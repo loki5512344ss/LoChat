@@ -2,6 +2,7 @@ package com.loki.lochat.core.service.messaging;
 
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
+import com.loki.lochat.api.service.PlayerService;
 import com.loki.lochat.api.service.pm.PrivateMessageService;
 import com.loki.lochat.utils.format.ChatFormatter;
 import com.loki.lochat.utils.player.PlayerUtil;
@@ -23,10 +24,12 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
 
     private final Map<UUID, UUID> lastConversation = new ConcurrentHashMap<>();
     private final LoChat plugin;
+    private final PlayerService playerService;
     private MessagingService messagingService;
 
-    public PrivateMessageServiceImpl(LoChat plugin) {
+    public PrivateMessageServiceImpl(LoChat plugin, PlayerService playerService) {
         this.plugin = plugin;
+        this.playerService = playerService;
     }
 
     public void init(MessagingService messagingService) {
@@ -56,6 +59,19 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
     @Override
     public void sendPrivateMessage(CommandSender sender, Player target, String message) {
         Player playerSender = (Player) sender;
+
+        int cooldown = plugin.getConfig().getInt("chat.pm.cooldown", 2);
+        if (cooldown > 0 && !playerSender.hasPermission("chat.bypass.cooldown")
+                && playerService.isOnCooldown(playerSender.getUniqueId(), "pm", cooldown)) {
+            int remaining = playerService.getRemainingCooldown(
+                    playerSender.getUniqueId(), "pm", cooldown);
+            String cooldownMessage = plugin.getConfigManager().getMessagesConfig()
+                    .getCooldownMessage().replace("{remaining}", String.valueOf(remaining));
+            sender.sendMessage(ChatFormatter.parse(cooldownMessage));
+            return;
+        }
+        playerService.setCooldown(playerSender.getUniqueId(), "pm");
+
         sender.sendMessage(ChatFormatter.formatPmSentNew(
                 plugin.getMessageConfig().getPmFormatSent(), playerSender, target, message));
         target.sendMessage(ChatFormatter.formatPmReceivedNew(

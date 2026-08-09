@@ -4,6 +4,7 @@ import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.config.RatConfig;
 import com.loki.lochat.utils.format.ChatFormatter;
 import com.loki.lochat.utils.persistence.FilePersistence;
+import com.loki.lochat.utils.platform.FoliaUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -76,6 +77,9 @@ public class NickServiceImpl implements NickService {
         // Устанавливаем ник
         nicknames.put(player, nickname);
 
+        // Персистим сразу — не теряем ники при падении сервера
+        FoliaUtil.runAsync(plugin, this::save);
+
         // Обновляем display
         Player onlinePlayer = Bukkit.getPlayer(player);
         if (onlinePlayer != null) {
@@ -88,6 +92,9 @@ public class NickServiceImpl implements NickService {
     @Override
     public void resetNickname(UUID player) {
         nicknames.remove(player);
+
+        // Персистим сразу
+        FoliaUtil.runAsync(plugin, this::save);
 
         // Сбрасываем display
         Player onlinePlayer = Bukkit.getPlayer(player);

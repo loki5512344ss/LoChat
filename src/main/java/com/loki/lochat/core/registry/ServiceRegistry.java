@@ -52,7 +52,7 @@ public class ServiceRegistry {
 
         register(ChatService.class, new ChatServiceImpl(plugin, messageService));
 
-        PrivateMessageServiceImpl pmService = new PrivateMessageServiceImpl((LoChat) plugin);
+        PrivateMessageServiceImpl pmService = new PrivateMessageServiceImpl((LoChat) plugin, playerService);
         MessagingService messagingService = ServiceFactory.createMessagingService(plugin, messageConfig, pmService);
         pmService.init(messagingService);
         register(PrivateMessageService.class, pmService);

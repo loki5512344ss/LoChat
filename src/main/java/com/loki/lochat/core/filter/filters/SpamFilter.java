@@ -5,17 +5,16 @@ import com.loki.lochat.core.filter.FilterResult;
 
 import org.bukkit.entity.Player;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SpamFilter {
     private final int maxSimilar;
     private final int threshold;
     private final String blockMessage;
-    private final Map<UUID, Deque<String>> spamTracker = new ConcurrentHashMap<>();
+    private final Map<UUID, ConcurrentLinkedDeque<String>> spamTracker = new ConcurrentHashMap<>();
 
     public SpamFilter(FiltersConfig filters) {
         this(filters.getSpamMaxSimilarMessages(), filters.getSpamSimilarityThreshold(),
@@ -33,8 +32,8 @@ public class SpamFilter {
             return FilterResult.ok(message);
         }
 
-        Deque<String> history = spamTracker.computeIfAbsent(
-            player.getUniqueId(), k -> new ArrayDeque<>());
+        ConcurrentLinkedDeque<String> history = spamTracker.computeIfAbsent(
+            player.getUniqueId(), k -> new ConcurrentLinkedDeque<>());
 
         // Считаем похожие сообщения
         long similarCount = history.stream()

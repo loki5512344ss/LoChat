@@ -99,26 +99,26 @@
 
 **Fix:** Extract `FilePersistenceUtil` or base class
 
-### 2. Persist nicknames on change
-`NickServiceImpl.java:77` mutates only in-memory map; `save()` only on shutdown → nicknames lost on crash (async save after mutation).
+### 2. Persist nicknames on change ✅
+`NickServiceImpl` now saves asynchronously (`FoliaUtil.runAsync → save()`) on every `setNickname`/`resetNickname` — nicknames survive crashes.
 
 ### 3. DIP: Service Locator Anti-Pattern
 `ServiceRegistry.get(Xxx.class)` used everywhere instead of constructor DI. Big refactor.
 
-### 4. DRY: PM Send Logic Duplicated
-`MsgCommand` + `ReplyCommand` still have near-identical send logic.
+### 4. DRY: PM Send Logic ✅
+PM cooldown + actual send centralized in `PrivateMessageServiceImpl.sendPrivateMessage`; both `/msg` and `/reply` delegate to it.
 
-### 5. Fix cooldown map collision
-`PlayerServiceImpl.java:80-82` — all non-global types (local chat + RP `/me /do /try /roll`) share one map → cross-blocking cooldowns. Split per-type maps.
+### 5. Fix cooldown map collision ✅
+`PlayerServiceImpl` now keeps a separate `ConcurrentHashMap` per chat type (`global`, `local`, `rp_me`, `rp_do`, `rp_try`, `pm`) — no more cross-blocking. Covered by `PlayerServiceCooldownTest`.
 
-### 6. Thread-safe flood/spam deques
-`FloodFilter.java:32`, `SpamFilter.java:30` use plain `ArrayDeque` written from async threads, read from main → use synchronized/thread-safe structures.
+### 6. Thread-safe flood/spam deques ✅
+`FloodFilter`/`SpamFilter` now use `ConcurrentLinkedDeque` instead of plain `ArrayDeque`.
 
 ### 7. Tests
 Only 11 test files for 155 main files. Very low coverage (JaCoCo wired, CI uploads report).
 
-### 8. No PM cooldown
-`chat.pm.cooldown: 2` in config.yml is never read → `/msg` spam unthrottled.
+### 8. No PM cooldown ✅
+`chat.pm.cooldown` (default 2s) is now enforced in `PrivateMessageServiceImpl.sendPrivateMessage`, honoring `chat.bypass.cooldown`.
 
 ---
 

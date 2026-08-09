@@ -5,18 +5,17 @@ import com.loki.lochat.core.filter.FilterResult;
 
 import org.bukkit.entity.Player;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class FloodFilter {
     private static final String FLOOD_BLOCK_MESSAGE = "&#CF6679Не флудите!";
 
     private final int maxMessages;
     private final int timePeriod;
-    private final Map<UUID, Deque<Long>> floodTracker = new ConcurrentHashMap<>();
+    private final Map<UUID, ConcurrentLinkedDeque<Long>> floodTracker = new ConcurrentHashMap<>();
 
     public FloodFilter(FiltersConfig filters) {
         this.maxMessages = filters.getFloodMaxMessages();
@@ -31,8 +30,8 @@ public class FloodFilter {
         long now = System.currentTimeMillis();
         long windowMs = timePeriod * 1000L;
 
-        Deque<Long> timestamps = floodTracker.computeIfAbsent(
-            player.getUniqueId(), k -> new ArrayDeque<>());
+        ConcurrentLinkedDeque<Long> timestamps = floodTracker.computeIfAbsent(
+            player.getUniqueId(), k -> new ConcurrentLinkedDeque<>());
 
         // Удаляем старые timestamp'ы
         while (!timestamps.isEmpty() && now - timestamps.peekFirst() > windowMs) {

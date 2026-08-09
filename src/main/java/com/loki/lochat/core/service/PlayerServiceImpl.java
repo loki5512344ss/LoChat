@@ -20,9 +20,8 @@ public class PlayerServiceImpl implements PlayerService {
     
     private final JavaPlugin plugin;
     
-    // Cooldown state
-    private final Map<UUID, Long> globalCooldowns = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> localCooldowns = new ConcurrentHashMap<>();
+    // Cooldown state — separate map per chat type (global, local, rp_me, rp_do, rp_try, pm...)
+    private final Map<String, Map<UUID, Long>> cooldowns = new ConcurrentHashMap<>();
     
     // Statistics state
     private final Map<UUID, Long> playerMessages = new ConcurrentHashMap<>();
@@ -74,12 +73,11 @@ public class PlayerServiceImpl implements PlayerService {
     
     @Override
     public void removeCooldown(UUID player) {
-        globalCooldowns.remove(player);
-        localCooldowns.remove(player);
+        cooldowns.values().forEach(map -> map.remove(player));
     }
     
     private Map<UUID, Long> getCooldownMap(String type) {
-        return "global".equals(type) ? globalCooldowns : localCooldowns;
+        return cooldowns.computeIfAbsent(type, k -> new ConcurrentHashMap<>());
     }
     
     // ========== Statistics Implementation ==========
