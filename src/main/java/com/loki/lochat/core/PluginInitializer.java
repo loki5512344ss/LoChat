@@ -106,6 +106,7 @@ public class PluginInitializer {
                                                      MessagingService messagingService, NickService nickService,
                                                      PunishmentService punishmentService) {
         AdvancedMessageFilter filter = new AdvancedMessageFilter(plugin.getConfig(), plugin);
+        plugin.setChatFilter(filter);
 
         plugin.getServer().getPluginManager().registerEvents(
             new ChatEventListener(plugin, messageService, playerService, filter), plugin

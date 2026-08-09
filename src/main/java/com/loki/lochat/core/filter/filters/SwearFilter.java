@@ -1,9 +1,9 @@
 package com.loki.lochat.core.filter.filters;
 
+import com.loki.lochat.config.FiltersConfig;
 import com.loki.lochat.core.filter.FilterResult;
 import com.loki.lochat.utils.text.AhoCorasick;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,10 +20,10 @@ public class SwearFilter {
     private final String replacement;
     private AhoCorasick ahoCorasick;
 
-    public SwearFilter(FileConfiguration config, JavaPlugin plugin) {
-        this.enabled = config.getBoolean("filters.swear.enabled", true);
-        this.replaceMode = config.getBoolean("filters.swear.replace", false);
-        this.replacement = config.getString("filters.swear.replacement", "***");
+    public SwearFilter(FiltersConfig filters, JavaPlugin plugin) {
+        this.enabled = filters.isSwearEnabled();
+        this.replaceMode = "replace".equals(filters.getSwearAction());
+        this.replacement = filters.getSwearReplacementChar();
 
         if (enabled) {
             loadWordList(plugin);

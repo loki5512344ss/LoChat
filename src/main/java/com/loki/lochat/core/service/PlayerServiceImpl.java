@@ -32,6 +32,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final AtomicLong totalMessages = new AtomicLong(0);
     
     private FileConfiguration stats;
+    private final Object statsLock = new Object();
 
     public PlayerServiceImpl(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -113,26 +114,30 @@ public class PlayerServiceImpl implements PlayerService {
     
     @Override
     public void saveAll() {
-        stats.set("global.total-messages",
-                stats.getLong("global.total-messages", 0) + totalMessages.getAndSet(0));
-        stats.set("by-type.global-chat",
-                stats.getLong("by-type.global-chat", 0) + globalChatCount.getAndSet(0));
-        stats.set("by-type.local-chat",
-                stats.getLong("by-type.local-chat", 0) + localChatCount.getAndSet(0));
-        stats.set("by-type.private-messages",
-                stats.getLong("by-type.private-messages", 0) + pmCount.getAndSet(0));
-        stats.set("last-updated", System.currentTimeMillis());
-        FilePersistence.saveYaml(plugin, "data/statistics.yml", stats);
+        synchronized (statsLock) {
+            stats.set("global.total-messages",
+                    stats.getLong("global.total-messages", 0) + totalMessages.getAndSet(0));
+            stats.set("by-type.global-chat",
+                    stats.getLong("by-type.global-chat", 0) + globalChatCount.getAndSet(0));
+            stats.set("by-type.local-chat",
+                    stats.getLong("by-type.local-chat", 0) + localChatCount.getAndSet(0));
+            stats.set("by-type.private-messages",
+                    stats.getLong("by-type.private-messages", 0) + pmCount.getAndSet(0));
+            stats.set("last-updated", System.currentTimeMillis());
+            FilePersistence.saveYaml(plugin, "data/statistics.yml", stats);
+        }
     }
     
     // ========== Private Methods ==========
     
     private void persistPlayerMessages(UUID uuid, long count) {
-        String path = "top-players.by-messages." + uuid;
-        long prev = stats.getLong(path + ".count", 0);
-        stats.set(path + ".count", prev + count);
-        stats.set(path + ".last-updated", System.currentTimeMillis());
-        FilePersistence.saveYaml(plugin, "data/statistics.yml", stats);
+        synchronized (statsLock) {
+            String path = "top-players.by-messages." + uuid;
+            long prev = stats.getLong(path + ".count", 0);
+            stats.set(path + ".count", prev + count);
+            stats.set(path + ".last-updated", System.currentTimeMillis());
+            FilePersistence.saveYaml(plugin, "data/statistics.yml", stats);
+        }
         playerMessages.remove(uuid);
     }
     

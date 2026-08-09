@@ -1,5 +1,7 @@
 package com.loki.lochat.core.filter;
 
+import com.loki.lochat.LoChat;
+import com.loki.lochat.config.FiltersConfig;
 import com.loki.lochat.core.filter.filters.CharacterFilter;
 import com.loki.lochat.core.filter.filters.FloodFilter;
 import com.loki.lochat.core.filter.filters.SpamFilter;
@@ -17,7 +19,7 @@ import java.util.UUID;
  */
 public class AdvancedMessageFilter {
 
-    private final FileConfiguration config;
+    private final FiltersConfig filtersConfig;
     private final CapsFilter capsFilter;
     private final SwearFilter swearFilter;
     private final FloodFilter floodFilter;
@@ -25,39 +27,32 @@ public class AdvancedMessageFilter {
     private final UrlFilter urlFilter;
     private final CharacterFilter characterFilter;
 
-    public AdvancedMessageFilter(FileConfiguration config) {
-        this(config, null);
+    public AdvancedMessageFilter(FileConfiguration config, JavaPlugin plugin) {
+        this.filtersConfig = resolveFiltersConfig(plugin);
+
+        int maxCapsPercent = filtersConfig.getCapsMaxPercent();
+        int minLength = filtersConfig.getCapsMinLength();
+        boolean autoLower = filtersConfig.isCapsAutoLowercase();
+        boolean blockCaps = filtersConfig.isCapsBlock();
+        this.capsFilter = new CapsFilter(maxCapsPercent, minLength, autoLower, blockCaps);
+
+        this.swearFilter = new SwearFilter(filtersConfig, plugin);
+        this.floodFilter = new FloodFilter(filtersConfig);
+        this.spamFilter = new SpamFilter(filtersConfig);
+        this.urlFilter = new UrlFilter(filtersConfig);
+        this.characterFilter = new CharacterFilter(filtersConfig);
     }
 
-    public AdvancedMessageFilter(FileConfiguration config, JavaPlugin plugin) {
-        this.config = config;
-        
-        // Инициализация CapsFilter
-        com.loki.lochat.config.FiltersConfig filtersConfig = null;
-        if (plugin instanceof com.loki.lochat.LoChat loChat) {
-            filtersConfig = loChat.getConfigManager().getFiltersConfig();
+    private static FiltersConfig resolveFiltersConfig(JavaPlugin plugin) {
+        if (plugin instanceof LoChat loChat) {
+            return loChat.getConfigManager().getFiltersConfig();
         }
-        
-        if (filtersConfig != null) {
-            int maxCapsPercent = filtersConfig.getCapsMaxPercent();
-            int minLength = filtersConfig.getCapsMinLength();
-            boolean autoLower = filtersConfig.isCapsAutoLowercase();
-            boolean blockCaps = filtersConfig.isCapsBlock();
-            this.capsFilter = new CapsFilter(maxCapsPercent, minLength, autoLower, blockCaps);
-        } else {
-            int maxCapsPercent = config.getInt("filters.caps.max-percent", 70);
-            int minLength = config.getInt("filters.caps.min-length", 5);
-            boolean autoLower = config.getBoolean("filters.caps.auto-lowercase", true);
-            boolean blockCaps = config.getBoolean("filters.caps.block", false);
-            this.capsFilter = new CapsFilter(maxCapsPercent, minLength, autoLower, blockCaps);
+        if (plugin != null) {
+            FiltersConfig filtersConfig = new FiltersConfig(plugin);
+            filtersConfig.init();
+            return filtersConfig;
         }
-        
-        // Инициализация остальных фильтров
-        this.swearFilter = new SwearFilter(config, plugin);
-        this.floodFilter = new FloodFilter(config);
-        this.spamFilter = new SpamFilter(config);
-        this.urlFilter = new UrlFilter(config);
-        this.characterFilter = new CharacterFilter(config);
+        throw new IllegalArgumentException("AdvancedMessageFilter requires a FiltersConfig");
     }
 
     /**
@@ -74,7 +69,7 @@ public class AdvancedMessageFilter {
     public FilterResult filterMessage(Player player, String message) {
         
         // 1. Капс
-        if (config.getBoolean("filters.caps.enabled", true)) {
+        if (filtersConfig.isCapsEnabled()) {
             String filtered = capsFilter.filter(player, message);
             if (filtered == null) {
                 return FilterResult.blocked("&#CF6679Не кричите в чате");
@@ -83,7 +78,7 @@ public class AdvancedMessageFilter {
         }
 
         // 2. Мат
-        if (config.getBoolean("filters.swear.enabled", true) && !canBypassFilter(player, "swear")) {
+        if (filtersConfig.isSwearEnabled() && !canBypassFilter(player, "swear")) {
             FilterResult swear = swearFilter.filter(player, message);
             if (!swear.allowed()) {
                 return swear;
@@ -92,7 +87,7 @@ public class AdvancedMessageFilter {
         }
 
         // 3. URL фильтры
-        if (config.getBoolean("filters.advertising.enabled", true)) {
+        if (filtersConfig.isAdvertisingEnabled()) {
             FilterResult r = urlFilter.filterUrls(player, message);
             if (!r.allowed()) {
                 return r;
@@ -106,7 +101,7 @@ public class AdvancedMessageFilter {
         }
 
         // 4. IP
-        if (config.getBoolean("filters.ip.enabled", true)) {
+        if (filtersConfig.isIpEnabled()) {
             FilterResult r = urlFilter.filterIPs(player, message);
             if (!r.allowed()) {
                 return r;
@@ -115,12 +110,12 @@ public class AdvancedMessageFilter {
         }
 
         // 5. Повторяющиеся символы
-        if (config.getBoolean("filters.repeat.enabled", true)) {
+        if (filtersConfig.isRepeatEnabled()) {
             message = characterFilter.filter(message);
         }
 
         // 6. Anti-flood
-        if (config.getBoolean("filters.flood.enabled", true) && !canBypassFilter(player, "flood")) {
+        if (filtersConfig.isFloodEnabled() && !canBypassFilter(player, "flood")) {
             FilterResult r = floodFilter.filter(player);
             if (!r.allowed()) {
                 return r;
@@ -128,7 +123,7 @@ public class AdvancedMessageFilter {
         }
 
         // 7. Anti-spam
-        if (config.getBoolean("filters.spam.enabled", true) && !canBypassFilter(player, "spam")) {
+        if (filtersConfig.isSpamEnabled() && !canBypassFilter(player, "spam")) {
             FilterResult r = spamFilter.filter(player, message);
             if (!r.allowed()) {
                 return r;

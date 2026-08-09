@@ -1,8 +1,8 @@
 package com.loki.lochat.core.filter.filters;
 
+import com.loki.lochat.config.FiltersConfig;
 import com.loki.lochat.core.filter.FilterResult;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
@@ -23,14 +23,23 @@ public class UrlFilter {
         "(?i)(h\\s*t\\s*t\\s*p|w\\s*w\\s*w|d\\s*o\\s*t\\s*c\\s*o\\s*m)"
     );
 
-    private final FileConfiguration config;
+    private static final String URL_BLOCKED_MESSAGE = "&#CF6679Ссылки запрещены!";
+    private static final String URL_BLACKLISTED_MESSAGE = "&#CF6679Эта ссылка запрещена!";
+    private static final String IP_BLOCKED_MESSAGE = "&#CF6679IP адреса запрещены!";
+    private static final String HIDDEN_URL_BLOCKED_MESSAGE = "&#CF6679Реклама запрещена!";
+
+    private final boolean blockHiddenUrls;
+    private final boolean blockIp;
+    private final String ipReplacement;
     private final Set<String> whitelistedDomains;
     private final Set<String> blacklistedDomains;
 
-    public UrlFilter(FileConfiguration config) {
-        this.config = config;
-        this.whitelistedDomains = new HashSet<>(config.getStringList("filters.advertising.whitelist"));
-        this.blacklistedDomains = new HashSet<>(config.getStringList("filters.advertising.blacklist"));
+    public UrlFilter(FiltersConfig filters) {
+        this.blockHiddenUrls = filters.isBlockHiddenUrls();
+        this.blockIp = filters.isIpBlock();
+        this.ipReplacement = filters.getIpReplacement();
+        this.whitelistedDomains = new HashSet<>(filters.getWhitelistedDomains());
+        this.blacklistedDomains = new HashSet<>(filters.getBlacklistedDomains());
     }
 
     public FilterResult filterUrls(Player player, String message) {
@@ -46,8 +55,7 @@ public class UrlFilter {
                 boolean ok = whitelistedDomains.stream()
                     .anyMatch(d -> domain.toLowerCase().contains(d.toLowerCase()));
                 if (!ok) {
-                    return FilterResult.blocked(config.getString("filters.url.blocked-message",
-                        "&#CF6679Ссылки запрещены!"));
+                    return FilterResult.blocked(URL_BLOCKED_MESSAGE);
                 }
             }
             
@@ -55,8 +63,7 @@ public class UrlFilter {
                 boolean bad = blacklistedDomains.stream()
                     .anyMatch(d -> domain.toLowerCase().contains(d.toLowerCase()));
                 if (bad) {
-                    return FilterResult.blocked(config.getString("filters.url.blocked-message",
-                        "&#CF6679Эта ссылка запрещена!"));
+                    return FilterResult.blocked(URL_BLACKLISTED_MESSAGE);
                 }
             }
         }
@@ -71,19 +78,17 @@ public class UrlFilter {
         
         Matcher matcher = IP_PATTERN.matcher(message);
         if (matcher.find()) {
-            if (config.getBoolean("filters.ip.block", false)) {
-                return FilterResult.blocked(config.getString("filters.ip.blocked-message",
-                    "&#CF6679IP адреса запрещены!"));
+            if (blockIp) {
+                return FilterResult.blocked(IP_BLOCKED_MESSAGE);
             }
-            return FilterResult.ok(matcher.replaceAll(
-                config.getString("filters.ip.replacement", "[IP скрыт]")));
+            return FilterResult.ok(matcher.replaceAll(ipReplacement));
         }
         
         return FilterResult.ok(message);
     }
 
     public FilterResult filterHiddenUrls(Player player, String message) {
-        if (!config.getBoolean("filters.advertising.block-hidden-urls", true)) {
+        if (!blockHiddenUrls) {
             return FilterResult.ok(message);
         }
         if (player.hasPermission("lochat.bypass.hiddenurls")) {
@@ -91,8 +96,7 @@ public class UrlFilter {
         }
         
         if (HIDDEN_URL_PATTERN.matcher(message).find()) {
-            return FilterResult.blocked(config.getString("filters.advertising.blocked-message",
-                "&#CF6679Реклама запрещена!"));
+            return FilterResult.blocked(HIDDEN_URL_BLOCKED_MESSAGE);
         }
         
         return FilterResult.ok(message);

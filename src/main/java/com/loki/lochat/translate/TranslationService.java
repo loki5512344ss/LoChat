@@ -10,19 +10,26 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 public class TranslationService {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
+    private static final int CACHE_MAX_SIZE = 2000;
 
     private final Logger logger;
     private final HttpClient httpClient;
     private final Gson gson;
-    private final Map<String, Map<String, String>> cache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, String>> cache;
+    private final ExecutorService executor;
     private final String endpoint;
     private final String apiKey;
     private final boolean enabled;
@@ -36,39 +43,53 @@ public class TranslationService {
                 .connectTimeout(TIMEOUT)
                 .build();
         this.gson = new Gson();
+        this.cache = Collections.synchronizedMap(new LinkedHashMap<String, Map<String, String>>() {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, Map<String, String>> eldest) {
+                return size() > CACHE_MAX_SIZE;
+            }
+        });
+        this.executor = Executors.newFixedThreadPool(2, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "lochat-translation");
+                t.setDaemon(true);
+                return t;
+            }
+        });
     }
 
     public boolean isEnabled() {
         return enabled && !endpoint.isBlank();
     }
 
-    public String translate(String text, String targetLanguage) {
+    public CompletableFuture<String> translateAsync(String text, String targetLanguage) {
         if (!isEnabled() || text == null || text.isBlank()) {
-            return text;
+            return CompletableFuture.completedFuture(text);
         }
 
         String langCode = localeToLanguageCode(targetLanguage);
-        String cacheKey = text.intern();
 
-        Map<String, String> langMap = cache.get(cacheKey);
-        if (langMap != null) {
-            String cached = langMap.get(langCode);
-            if (cached != null) {
-                return cached;
-            }
+        String cached = getCached(text, langCode);
+        if (cached != null) {
+            return CompletableFuture.completedFuture(cached);
         }
 
+        return CompletableFuture.supplyAsync(() -> fetchTranslation(text, langCode), executor);
+    }
+
+    private String fetchTranslation(String text, String targetLang) {
         try {
-            String translation = fetchTranslation(text, langCode);
-            cache.computeIfAbsent(cacheKey, k -> new ConcurrentHashMap<>()).put(langCode, translation);
+            String translation = doFetch(text, targetLang);
+            putCached(text, targetLang, translation);
             return translation;
         } catch (Exception e) {
-            logger.warning("Translation failed for \"" + abbreviate(text) + "\" to " + langCode + ": " + e.getMessage());
+            logger.warning("Translation failed for \"" + abbreviate(text) + "\" to " + targetLang + ": " + e.getMessage());
             return text;
         }
     }
 
-    private String fetchTranslation(String text, String targetLang) throws Exception {
+    private String doFetch(String text, String targetLang) throws Exception {
         JsonObject body = new JsonObject();
         body.addProperty("q", text);
         body.addProperty("source", "auto");
@@ -93,6 +114,27 @@ public class TranslationService {
 
         JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
         return json.get("translatedText").getAsString();
+    }
+
+    private String getCached(String text, String langCode) {
+        synchronized (cache) {
+            Map<String, String> langMap = cache.get(text);
+            if (langMap != null) {
+                return langMap.get(langCode);
+            }
+        }
+        return null;
+    }
+
+    private void putCached(String text, String langCode, String translation) {
+        synchronized (cache) {
+            Map<String, String> langMap = cache.get(text);
+            if (langMap == null) {
+                langMap = new LinkedHashMap<>();
+                cache.put(text, langMap);
+            }
+            langMap.put(langCode, translation);
+        }
     }
 
     public static String localeToLanguageCode(String locale) {

@@ -20,7 +20,7 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public int getCapsMaxPercent() {
-        return getConfig().getInt("caps.max-percent", 70);
+        return getConfig().getInt("caps.max-caps-percent", 70);
     }
 
     public int getCapsMinLength() {
@@ -28,11 +28,11 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public boolean isCapsAutoLowercase() {
-        return getConfig().getBoolean("caps.auto-lowercase", true);
+        return true;
     }
 
     public boolean isCapsBlock() {
-        return getConfig().getBoolean("caps.block", false);
+        return false;
     }
 
     // ── Мат ─────────────────────────────────────────────────────────────────────
@@ -42,11 +42,11 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public String getSwearAction() {
-        return getConfig().getString("swear.action", "replace");
+        return getConfig().getBoolean("swear.replace", true) ? "replace" : "block";
     }
 
     public String getSwearReplacementChar() {
-        return getConfig().getString("swear.replacement-char", "*");
+        return getConfig().getString("swear.replacement", "*");
     }
 
     public boolean isSwearCheckFragments() {
@@ -58,7 +58,7 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public boolean isSwearUseExternalFile() {
-        return getConfig().getBoolean("swear.use-external-file", true);
+        return true;
     }
 
     public List<String> getSwearWords() {
@@ -72,27 +72,27 @@ public class FiltersConfig extends BaseConfig {
     // ── Реклама ─────────────────────────────────────────────────────────────────
     
     public boolean isAdvertisingEnabled() {
-        return getConfig().getBoolean("advertising.enabled", true);
+        return getConfig().getBoolean("hidden-urls.enabled", true);
     }
 
     public boolean isBlockHiddenUrls() {
-        return getConfig().getBoolean("advertising.block-hidden-urls", true);
+        return getConfig().getBoolean("hidden-urls.enabled", true);
     }
 
     public boolean isBlockDomains() {
-        return getConfig().getBoolean("advertising.block-domains", true);
+        return true;
     }
 
     public List<String> getWhitelistedDomains() {
-        return getConfig().getStringList("advertising.whitelist");
+        return List.of();
     }
 
     public List<String> getBlacklistedDomains() {
-        return getConfig().getStringList("advertising.blacklist");
+        return List.of();
     }
 
     public String getAdvertisingBlockMessage() {
-        return getConfig().getString("advertising.blocked-message", "&#CF6679Реклама запрещена!");
+        return "&#CF6679Реклама запрещена!";
     }
 
     // ── IP адреса ───────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public boolean isIpBlock() {
-        return getConfig().getBoolean("ip.block", false);
+        return false;
     }
 
     public String getIpReplacement() {
@@ -116,11 +116,11 @@ public class FiltersConfig extends BaseConfig {
     // ── Повторяющиеся символы ───────────────────────────────────────────────────
     
     public boolean isRepeatEnabled() {
-        return getConfig().getBoolean("repeat.enabled", true);
+        return getConfig().getBoolean("spam.enabled", true);
     }
 
     public int getRepeatMaxRepeats() {
-        return getConfig().getInt("repeat.max-repeats", 3);
+        return getConfig().getInt("spam.max-repeating-chars", 3);
     }
 
     // ── Флуд ────────────────────────────────────────────────────────────────────
@@ -130,11 +130,11 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public int getFloodMaxMessages() {
-        return getConfig().getInt("flood.max-messages", 5);
+        return getConfig().getInt("flood.max-same-messages", 3);
     }
 
     public int getFloodTimePeriod() {
-        return getConfig().getInt("flood.time-period", 10);
+        return 10;
     }
 
     public String getFloodBlockMessage() {
@@ -148,11 +148,11 @@ public class FiltersConfig extends BaseConfig {
     }
 
     public int getSpamMaxSimilarMessages() {
-        return getConfig().getInt("spam.max-similar-messages", 3);
+        return 3;
     }
 
     public int getSpamSimilarityThreshold() {
-        return getConfig().getInt("spam.similarity-threshold", 80);
+        return 80;
     }
 
     public String getSpamBlockMessage() {

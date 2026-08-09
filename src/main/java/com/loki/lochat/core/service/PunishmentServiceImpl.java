@@ -94,7 +94,6 @@ public class PunishmentServiceImpl implements PunishmentService {
         }
         if (b.isExpired()) {
             bans.remove(uuid, b);
-            saveAsync();
             return false;
         }
         return true;

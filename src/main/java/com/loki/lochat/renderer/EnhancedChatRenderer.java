@@ -55,7 +55,12 @@ public class EnhancedChatRenderer implements ChatRenderer {
 
         if (viewer instanceof Player vp) {
             processed = mentionHandler.processMentions(processed, source, vp);
-            processed = applyTranslation(processed, vp);
+            if (cfg.isTranslationEnabled()) {
+                com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
+                if (loChat.getTranslationService().isEnabled()) {
+                    sendTranslationAsync(vp, PlainTextComponentSerializer.plainText().serialize(processed));
+                }
+            }
         }
 
         // Получаем формат из конфига
@@ -202,31 +207,26 @@ public class EnhancedChatRenderer implements ChatRenderer {
                 .clickEvent(ClickEvent.suggestCommand("/msg " + player.getName() + " "));
     }
 
-    private Component applyTranslation(Component message, Player viewer) {
-        if (!cfg.isTranslationEnabled()) {
-            return message;
+    private void sendTranslationAsync(Player viewer, String plainText) {
+        if (plainText.isBlank()) {
+            return;
         }
         com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
         TranslationService ts = loChat.getTranslationService();
-        if (!ts.isEnabled()) {
-            return message;
-        }
-        String plainText = PlainTextComponentSerializer.plainText().serialize(message);
-        if (plainText.isBlank()) {
-            return message;
-        }
         String viewerLang = viewer.locale().getLanguage();
-        String translated = ts.translate(plainText, viewerLang);
-        if (translated.equals(plainText)) {
-            return message;
-        }
-        String langName = LANGUAGE_NAMES.getOrDefault(viewerLang, viewerLang.toUpperCase(java.util.Locale.ROOT));
-        Component hover = Component.text()
-                .append(com.loki.lochat.utils.format.ChatFormatter.parse(
-                        "&#AAAAAA[" + langName + "]&#FFFFFF "))
-                .append(Component.text(translated))
-                .build();
-        return message.hoverEvent(HoverEvent.showText(hover));
+        ts.translateAsync(plainText, viewerLang)
+                .thenAccept(translated -> {
+                    if (translated.equals(plainText)) {
+                        return;
+                    }
+                    String langName = LANGUAGE_NAMES.getOrDefault(viewerLang, viewerLang.toUpperCase(java.util.Locale.ROOT));
+                    Component component = Component.text()
+                            .append(com.loki.lochat.utils.format.ChatFormatter.parse(
+                                    "&#AAAAAA[" + langName + "]&#FFFFFF "))
+                            .append(Component.text(translated))
+                            .build();
+                    viewer.sendActionBar(component);
+                });
     }
 
     private static final Map<String, String> LANGUAGE_NAMES = new HashMap<>();

@@ -218,3 +218,15 @@ messages:
 hub-command:
   enabled: true
   server: "hub"
+
+# ── Auto Messages ──────────────────────────────────────────────────────────────
+automessages:
+  enabled: true
+  interval: 300
+  random: false
+  messages:
+    welcome:
+      - "&7Добро пожаловать на сервер! &b%online%&7 игроков онлайн"
+    vote:
+      - "&7Голосуй за сервер и получай награды!"
+      - "&7Ссылка: example.com/vote"

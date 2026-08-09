@@ -1,8 +1,8 @@
 package com.loki.lochat.core.filter.filters;
 
+import com.loki.lochat.config.FiltersConfig;
 import com.loki.lochat.core.filter.FilterResult;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
@@ -12,11 +12,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FloodFilter {
-    private final FileConfiguration config;
+    private static final String FLOOD_BLOCK_MESSAGE = "&#CF6679Не флудите!";
+
+    private final int maxMessages;
+    private final int timePeriod;
     private final Map<UUID, Deque<Long>> floodTracker = new ConcurrentHashMap<>();
 
-    public FloodFilter(FileConfiguration config) {
-        this.config = config;
+    public FloodFilter(FiltersConfig filters) {
+        this.maxMessages = filters.getFloodMaxMessages();
+        this.timePeriod = filters.getFloodTimePeriod();
     }
 
     public FilterResult filter(Player player) {
@@ -24,8 +28,6 @@ public class FloodFilter {
             return FilterResult.ok(null);
         }
 
-        int maxMessages = config.getInt("filters.flood.max-messages", 5);
-        int timePeriod = config.getInt("filters.flood.time-period", 10);
         long now = System.currentTimeMillis();
         long windowMs = timePeriod * 1000L;
 
@@ -38,8 +40,7 @@ public class FloodFilter {
         }
 
         if (timestamps.size() >= maxMessages) {
-            return FilterResult.blocked(config.getString("filters.flood.block-message",
-                "&#CF6679Не флудите!"));
+            return FilterResult.blocked(FLOOD_BLOCK_MESSAGE);
         }
 
         timestamps.addLast(now);

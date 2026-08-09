@@ -1,8 +1,8 @@
 package com.loki.lochat.core.filter.filters;
 
+import com.loki.lochat.config.FiltersConfig;
 import com.loki.lochat.core.filter.FilterResult;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
@@ -12,20 +12,26 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SpamFilter {
-    private final FileConfiguration config;
+    private final int maxSimilar;
+    private final int threshold;
+    private final String blockMessage;
     private final Map<UUID, Deque<String>> spamTracker = new ConcurrentHashMap<>();
 
-    public SpamFilter(FileConfiguration config) {
-        this.config = config;
+    public SpamFilter(FiltersConfig filters) {
+        this(filters.getSpamMaxSimilarMessages(), filters.getSpamSimilarityThreshold(),
+                filters.getSpamBlockMessage());
+    }
+
+    public SpamFilter(int maxSimilar, int threshold, String blockMessage) {
+        this.maxSimilar = maxSimilar;
+        this.threshold = threshold;
+        this.blockMessage = blockMessage;
     }
 
     public FilterResult filter(Player player, String message) {
         if (player.hasPermission("lochat.bypass.spam")) {
             return FilterResult.ok(message);
         }
-
-        int maxSimilar = config.getInt("filters.spam.max-similar-messages", 3);
-        int threshold = config.getInt("filters.spam.similarity-threshold", 80);
 
         Deque<String> history = spamTracker.computeIfAbsent(
             player.getUniqueId(), k -> new ArrayDeque<>());
@@ -36,8 +42,7 @@ public class SpamFilter {
             .count();
 
         if (similarCount >= maxSimilar) {
-            return FilterResult.blocked(config.getString("filters.spam.block-message",
-                "&#CF6679Не отправляйте одинаковые сообщения"));
+            return FilterResult.blocked(blockMessage);
         }
 
         // Добавляем в историю (храним последние 10)

@@ -42,6 +42,7 @@ public final class LoChat extends JavaPlugin {
     // Вспомогательные классы
     private PluginInitializer initializer;
     private PluginShutdown shutdown;
+    private com.loki.lochat.core.filter.AdvancedMessageFilter chatFilter;
 
     @Override
     public void onEnable() {
@@ -152,5 +153,13 @@ public final class LoChat extends JavaPlugin {
 
     public TranslationService getTranslationService() {
         return translationService;
+    }
+
+    public com.loki.lochat.core.filter.AdvancedMessageFilter getChatFilter() {
+        return chatFilter;
+    }
+
+    public void setChatFilter(com.loki.lochat.core.filter.AdvancedMessageFilter chatFilter) {
+        this.chatFilter = chatFilter;
     }
 }

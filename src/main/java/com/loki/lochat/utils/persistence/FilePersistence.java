@@ -15,8 +15,15 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class FilePersistence {
+
+    private static final ConcurrentHashMap<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
 
     private FilePersistence() {}
 
@@ -34,12 +41,18 @@ public final class FilePersistence {
     }
 
     public static void saveYaml(JavaPlugin plugin, String name, FileConfiguration config) {
+        File target = getFile(plugin, name);
+        ReentrantLock lock = lockFor(target);
+        lock.lock();
         try {
-            File file = getFile(plugin, name);
-            file.getParentFile().mkdirs();
-            config.save(file);
+            target.getParentFile().mkdirs();
+            File tmp = new File(target.getParentFile(), target.getName() + ".tmp");
+            config.save(tmp);
+            moveIntoPlace(tmp, target);
         } catch (IOException e) {
             plugin.getLogger().warning("Failed to save " + name + ": " + e.getMessage());
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -57,14 +70,33 @@ public final class FilePersistence {
     }
 
     public static void saveJson(JavaPlugin plugin, String name, Object data, Gson gson) {
+        File target = getFile(plugin, name);
+        ReentrantLock lock = lockFor(target);
+        lock.lock();
         try {
-            File file = getFile(plugin, name);
-            file.getParentFile().mkdirs();
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            target.getParentFile().mkdirs();
+            File tmp = new File(target.getParentFile(), target.getName() + ".tmp");
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8)) {
                 gson.toJson(data, writer);
             }
+            moveIntoPlace(tmp, target);
         } catch (IOException e) {
             plugin.getLogger().warning("Failed to save " + name + ": " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static ReentrantLock lockFor(File target) {
+        return FILE_LOCKS.computeIfAbsent(target.getAbsolutePath(), k -> new ReentrantLock());
+    }
+
+    private static void moveIntoPlace(File tmp, File target) throws IOException {
+        try {
+            Files.move(tmp.toPath(), target.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 }

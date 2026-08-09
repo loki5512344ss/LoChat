@@ -4,16 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.loki.lochat.data.model.MuteData;
+import com.loki.lochat.utils.persistence.FilePersistence;
 import com.loki.lochat.utils.platform.FoliaUtil;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,27 +86,12 @@ public class MuteDataStorage {
     }
 
     private void save() {
-        try {
-            ensureDataFolderExists();
-            
-            Map<String, MuteData> toSave = new ConcurrentHashMap<>();
-            mutes.forEach((uuid, data) -> toSave.put(uuid.toString(), data));
-
-            try (Writer writer = new FileWriter(dataFile)) {
-                gson.toJson(toSave, writer);
-            }
-        } catch (IOException e) {
-            plugin.getLogger().warning("Error saving mutes: " + e.getMessage());
-        }
+        Map<String, MuteData> toSave = new HashMap<>();
+        mutes.forEach((uuid, data) -> toSave.put(uuid.toString(), data));
+        FilePersistence.saveJson(plugin, "mutes.json", toSave, gson);
     }
     
     private void saveAsync() {
         FoliaUtil.runAsync(plugin, this::save);
-    }
-    
-    private void ensureDataFolderExists() {
-        if (!dataFile.getParentFile().exists()) {
-            dataFile.getParentFile().mkdirs();
-        }
     }
 }

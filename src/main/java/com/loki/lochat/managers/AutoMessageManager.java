@@ -44,11 +44,11 @@ public class AutoMessageManager {
 
         // Настройки
         prefix = plugin.getConfigManager().getString("prefix", "&#00D4FF[LoChat]");
-        mode = "sequential"; // Всегда последовательно
+        mode = config.getBoolean("automessages.random", false) ? "random" : "sequential";
 
         // Загружаем сообщения из config.yml
         messages = new LinkedHashMap<>();
-        ConfigurationSection msgSection = config.getConfigurationSection("automessages-list");
+        ConfigurationSection msgSection = config.getConfigurationSection("automessages.messages");
 
         if (msgSection != null) {
             for (String key : msgSection.getKeys(false)) {

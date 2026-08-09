@@ -52,7 +52,7 @@ public class DiscordConfig {
     }
     
     public String getAvatarUrl() {
-        return config.getString("webhook.avatar_url", "");
+        return config.getString("webhook.avatar-url", "");
     }
     
     public int getTimeout() {
@@ -60,11 +60,11 @@ public class DiscordConfig {
     }
     
     public int getRetryAttempts() {
-        return config.getInt("performance.retry_attempts", 3);
+        return config.getInt("performance.retry-attempts", 3);
     }
     
     public long getRetryDelay() {
-        return config.getLong("performance.retry_delay", 1000);
+        return config.getLong("performance.retry-delay", 1000);
     }
     
     public boolean isAsync() {
@@ -84,11 +84,11 @@ public class DiscordConfig {
     }
     
     public boolean isGlobalOnly() {
-        return config.getBoolean("chat.global_only", true);
+        return config.getBoolean("chat.global-only", true);
     }
     
     public boolean useEmbed() {
-        return config.getBoolean("chat.use_embed", true);
+        return config.getBoolean("chat.use-embed", true);
     }
     
     public String getChatFormat() {
@@ -96,7 +96,7 @@ public class DiscordConfig {
     }
     
     public String getEmbedColor() {
-        return config.getString("chat.embed_color", "5865F2");
+        return config.getString("chat.embed-color", "5865F2");
     }
     
     public boolean isEventEnabled(String event) {
@@ -121,14 +121,14 @@ public class DiscordConfig {
     }
     
     public int getMinMessageLength() {
-        return config.getInt("filter.min_message_length", 1);
+        return config.getInt("filter.min-message-length", 1);
     }
     
     public int getMaxMessageLength() {
-        return config.getInt("filter.max_message_length", 2000);
+        return config.getInt("filter.max-message-length", 2000);
     }
     
     public boolean sanitizeMentions() {
-        return config.getBoolean("filter.sanitize_mentions", true);
+        return config.getBoolean("filter.sanitize-mentions", true);
     }
 }

@@ -58,7 +58,7 @@ public class AppearanceConfig extends BaseConfig {
         return getConfig().getStringList("prefixes.global.colors");
     }
     public String getGlobalSeparatorText() {
-        return getPrefixValue("global", "separator.text", " ▶ ");
+        return getPrefixValue("global", "separator", " ▶ ");
     }
     public String getGlobalSeparatorColor() {
         return getPrefixValue("global", "separator.color", "#FFD700");
@@ -77,7 +77,7 @@ public class AppearanceConfig extends BaseConfig {
         return getConfig().getStringList("prefixes.local.colors");
     }
     public String getLocalSeparatorText() {
-        return getPrefixValue("local", "separator.text", " ▶ ");
+        return getPrefixValue("local", "separator", " ▶ ");
     }
     public String getLocalSeparatorColor() {
         return getPrefixValue("local", "separator.color", "#FFFFFF");
@@ -117,16 +117,16 @@ public class AppearanceConfig extends BaseConfig {
     // ========== НАСТРОЙКИ ЧАТА ==========
     
     public int getLocalRadius() {
-        return getConfig().getInt("chat.local_radius", 100);
+        return getConfig().getInt("chat.local-radius", 100);
     }
     public int getClearLines() {
-        return getConfig().getInt("chat.clear_lines", 100);
+        return getConfig().getInt("chat.clear-lines", 100);
     }
     public int getMinMessageLength() {
-        return getConfig().getInt("chat.min_message_length", 1);
+        return getConfig().getInt("chat.min-message-length", 1);
     }
     public int getMaxMessageLength() {
-        return getConfig().getInt("chat.max_message_length", 2000);
+        return getConfig().getInt("chat.max-message-length", 2000);
     }
     
     private String getChatColor(String type, String defaultColor) {
@@ -134,7 +134,7 @@ public class AppearanceConfig extends BaseConfig {
     }
     
     public String getNobodyHeardColor() {
-        return getChatColor("nobody_heard", "#FFA726");
+        return getChatColor("nobody-heard", "#FFA726");
     }
     public String getErrorColor() {
         return getChatColor("error", "#FF6B6B");
@@ -152,18 +152,18 @@ public class AppearanceConfig extends BaseConfig {
     // ========== DISCORD ==========
     
     public String getDiscordEmoji(String event) {
-        return getConfig().getString("discord.emojis." + event, "");
+        return getConfig().getString("discord.emojis." + event.replace('_', '-'), "");
     }
     public String getDiscordEventTitle(String event) {
-        return getConfig().getString("discord.event_titles." + event, "");
+        return getConfig().getString("discord.event-titles." + event.replace('_', '-'), "");
     }
     public String getDefaultAvatarUrl() {
-        return getConfig().getString("discord.avatar_urls.default", "https://mc-heads.net/avatar/minecraft/64");
+        return getConfig().getString("discord.avatar-urls.default", "https://mc-heads.net/avatar/minecraft/64");
     }
     public String getPlayerAvatarUrl() {
-        return getConfig().getString("discord.avatar_urls.player", "https://mc-heads.net/avatar/{player}/64");
+        return getConfig().getString("discord.avatar-urls.player", "https://mc-heads.net/avatar/{player}/64");
     }
     public String getDefaultEmbedColor() {
-        return getConfig().getString("discord.default_embed_color", "5865F2");
+        return getConfig().getString("discord.default-embed-color", "5865F2");
     }
 }

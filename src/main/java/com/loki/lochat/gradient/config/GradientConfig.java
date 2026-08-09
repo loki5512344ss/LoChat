@@ -12,11 +12,9 @@ public class GradientConfig {
 
     private final JavaPlugin plugin;
     private FileConfiguration config;
-    private FileConfiguration mainConfig;
 
     public GradientConfig(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.mainConfig = plugin.getConfig();
         loadConfig();
     }
 
@@ -28,7 +26,6 @@ public class GradientConfig {
 
     public void reload() {
         plugin.reloadConfig();
-        this.mainConfig = plugin.getConfig();
         this.config = plugin.getConfig();
     }
 
@@ -42,56 +39,51 @@ public class GradientConfig {
     }
 
     public int getMaxColors() {
-        return config.getInt("gradient.max-colors", 7);
+        return config.getInt("gradient.limits.max-colors", 7);
     }
 
     public int getMinColors() {
-        return config.getInt("gradient.min-colors", 1);
+        return config.getInt("gradient.limits.min-colors", 1);
     }
 
     public int getPricePerColor() {
-        return config.getInt("gradient.price-per-color", 50);
+        return config.getInt("gradient.pricing.price-per-color", 50);
     }
 
     public int getPrefixPrice() {
-        return config.getInt("gradient.prefix-price", 500);
+        return config.getInt("gradient.pricing.prefix-price", 500);
     }
 
     public boolean isPrefixOneTimePurchase() {
-        return config.getBoolean("gradient.prefix-one-time-purchase", true);
+        return config.getBoolean("gradient.pricing.prefix-one-time-purchase", true);
     }
 
     public int getColorCooldown() {
-        return config.getInt("gradient.color-cooldown", 60);
+        return config.getInt("gradient.cooldowns.color", 60);
     }
 
     public int getPrefixCooldown() {
-        return config.getInt("gradient.prefix-cooldown", 120);
+        return config.getInt("gradient.cooldowns.prefix", 120);
     }
 
     public int getMaxPrefixLength() {
-        return config.getInt("gradient.max-prefix-length", 16);
+        return config.getInt("gradient.limits.max-prefix-length", 16);
     }
 
     public String getPrefixFormat() {
-        // Сначала проверяем в formatting.prefix-format (из gradient-config.yml)
-        if (config.contains("formatting.prefix-format")) {
-            return config.getString("formatting.prefix-format", "[{prefix}] ");
-        }
-        // Затем проверяем в gradient.prefix-format (из config.yml)
-        return config.getString("gradient.prefix-format", "[{prefix}] ");
+        return config.getString("gradient.formatting.prefix-format", "[{prefix}] ");
     }
 
     public boolean isGradientOnPrefix() {
-        return config.getBoolean("gradient.gradient-on-prefix", true);
+        return config.getBoolean("gradient.formatting.gradient-on-prefix", true);
     }
 
     public boolean isGradientOnLuckPermsPrefix() {
-        return config.getBoolean("gradient.gradient-on-luckperms-prefix", true);
+        return config.getBoolean("gradient.formatting.gradient-on-luckperms-prefix", true);
     }
 
     public boolean isContinuousGradient() {
-        return config.getBoolean("gradient.continuous-gradient", true);
+        return config.getBoolean("gradient.formatting.continuous-gradient", true);
     }
 
     public boolean isUseLegacyRgbFormat() {
@@ -99,15 +91,15 @@ public class GradientConfig {
     }
 
     public String getStorageType() {
-        return config.getString("gradient.storage-type", "file");
+        return config.getString("gradient.storage.type", "file");
     }
 
     public String getSqliteFile() {
-        return config.getString("gradient.sqlite-file", "gradient-data.db");
+        return config.getString("gradient.storage.sqlite-file", "gradient-data.db");
     }
 
     public List<String> getPrefixBlacklist() {
-        return config.getStringList("gradient.prefix-blacklist");
+        return List.of();
     }
 
     public boolean isPrefixBlacklisted(String prefix) {
@@ -117,16 +109,10 @@ public class GradientConfig {
     }
 
     public boolean isUpdateDisplayName() {
-        if (mainConfig.contains("display.update-display-name")) {
-            return mainConfig.getBoolean("display.update-display-name", true);
-        }
-        return config.getBoolean("display.update-display-name", true);
+        return config.getBoolean("gradient.display.update-display-name", true);
     }
 
     public boolean isUpdateTabList() {
-        if (mainConfig.contains("display.update-tab-list")) {
-            return mainConfig.getBoolean("display.update-tab-list", true);
-        }
-        return config.getBoolean("display.update-tab-list", true);
+        return config.getBoolean("gradient.display.update-tab-list", true);
     }
 }

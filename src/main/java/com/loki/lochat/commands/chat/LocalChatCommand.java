@@ -4,8 +4,6 @@ import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChatService;
 import com.loki.lochat.utils.format.ChatFormatter;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class LocalChatCommand implements CommandExecutor {
 
-    private static final MiniMessage MM = MiniMessage.miniMessage();
     private final LoChat plugin;
     private final ChatService chatService;
 
@@ -35,7 +32,7 @@ public class LocalChatCommand implements CommandExecutor {
             return true;
         }
 
-        chatService.sendLocalMessage(player, MM.deserialize(String.join(" ", args)));
+        chatService.sendLocalMessage(player, String.join(" ", args));
         return true;
     }
 }

@@ -1,6 +1,38 @@
 # LoChat Development TODO
 
-> Last updated: 2026-07-05
+> Last updated: 2026-08-04
+
+---
+
+## ✅ CRITICAL FIXES (blocking release — from code review 2026-08-04, all DONE)
+
+### 1. Translation: async + bounded cache, no String.intern(), out of render() ✅
+- `renderer/EnhancedChatRenderer.java` — removed blocking `applyTranslation()` from `render()` (zero network I/O in render path). Translation is now delivered via async action bar (`sendTranslationAsync` → `translateAsync().thenAccept`).
+- `translate/TranslationService.java` — no more `String.intern()`; bounded LRU cache (2000 entries, synchronized LinkedHashMap); `translateAsync` runs on a dedicated 2-thread daemon executor; failures return original text, never throw.
+
+### 2. Atomic file writes (temp + rename, per-file lock) for all persistence ✅
+- `utils/persistence/FilePersistence.java` — `saveYaml`/`saveJson` now write `<name>.tmp` + `Files.move(ATOMIC_MOVE, REPLACE_EXISTING)` under a per-file `ReentrantLock`.
+- `core/service/PlayerServiceImpl.java` — `statsLock` serializes async `persistPlayerMessages` and main-thread `saveAll()`.
+- `core/service/PunishmentServiceImpl.java` — removed `saveAsync()` from `isBanned()` read path.
+- `core/service/mute/MuteDataStorage.java` — uses `FilePersistence.saveJson` (atomic), dropped raw FileWriter.
+- `core/service/mute/MuteHistoryManager.java` — atomic temp+rename write under per-file lock, no `e.printStackTrace()`.
+
+### 3. Route /g and /l through the same filter pipeline + escape MiniMessage ✅
+- `core/service/ChatServiceImpl.java` — `String` messages now run length check → `MessageService.processMessage` (mute/cooldown) → `AdvancedMessageFilter` → `MiniMessage.escapeTags()` → component (colors only with `lochat.chat.colors`). `Component` messages bypass (trusted internal). Local radius from `AppearanceConfig`.
+- `commands/chat/GlobalChatCommand.java`, `LocalChatCommand.java` — pass plain `String`, no more `MM.deserialize(raw input)`.
+- `LoChat.java`/`PluginInitializer.java` — filter instance stored on plugin; `ServiceRegistry` builds `MessageService` before `ChatService`.
+
+### 4. Remove duplicate Discord send; single global/local detection ✅
+- `listener/DiscordEventListener.java` — deleted the `onChat(AsyncChatEvent)` handler; `ChatEventListener` is now the single send path with correct `isGlobal`.
+
+### 5. Fix config key mismatches (underscore vs dash / nesting) ✅
+- `config/AppearanceConfig.java` — `chat.local-radius`, `chat.clear-lines`, `chat.min-message-length`, `chat.max-message-length`, `chat.colors.*` (dash), `prefixes.*.separator` (string), `discord.avatar-urls.*`, `discord.event-titles.*` (+ `_`→`-` normalization).
+- `integrations/discord/DiscordConfig.java` — `webhook.avatar-url`, `chat.global-only`, `chat.use-embed`, `chat.embed-color`, `filter.*` (dash), `performance.retry-*`.
+- `config/MuteConfig.java` — `settings.*`, `notifications.*`.
+- `config/SoundsConfig.java` — `messages.mention.*`, `messages.private-message.*`, `commands.success.*`.
+- `config/FiltersConfig.java` + filters — `config/filters.yml` is now the single source of truth (`caps.max-caps-percent`, `swear.replace`, `hidden-urls.*`, `spam.max-repeating-chars`, `flood.max-same-messages`).
+- `gradient/config/GradientConfig.java` — nested keys `gradient.limits.*`, `gradient.pricing.*`, `gradient.cooldowns.*`, `gradient.formatting.*`, `gradient.storage.type` → **SQLite now detected**.
+- `managers/AutoMessageManager.java` + `config.yml` — reads `automessages.messages` (new `automessages:` section added to config.yml), honors `automessages.random`.
 
 ---
 
@@ -32,7 +64,34 @@
 
 ---
 
-## 🟡 REMAINING (COULD DO)
+## 🟡 NEXT: NEW FEATURES
+
+### 1. Channels (like VentureChat / Carbon)
+- `/join`, `/leave`, `/channel` — full channel system: global, local, staff, trade, party.
+- Per-channel colors, aliases, permissions, cooldowns, spy mode.
+- Party chat: private groups `/party`.
+- Network channels (Bungee/Velocity) sync.
+
+### 2. Anti-swear hardening + filter statistics
+- Bypass obfuscation: `q→р` leet/Unicode substitution, repeated chars between letters, spaces/dots inside words.
+- Track filter stats (how many messages blocked per filter) → expose via command/placeholder.
+
+### 3. Stable plugin API + API events
+- Publish `api/` modules to a repo so third-party plugins can depend on it.
+- Add `api-version` hint / `provides` in `plugin.yml` for dependency resolution.
+- Dedicated API events: `LoChatMessageEvent`, `LoChatFilterEvent`, `LoChatPunishEvent` etc.
+
+### 4. DiscordSRV-style 2-way bridge (Discord → chat)
+- Read messages from a Discord channel (bot or webhook listener) and relay into Minecraft chat.
+- Channel ↔ Discord channel mapping.
+
+### 5. Full spy + auto-mute for spam
+- PM spy + command spy with custom formats (like VentureChat).
+- Auto-mute repeat offenders (spam/flood) with configurable threshold and duration.
+
+---
+
+## 🔵 LOWER PRIORITY (carry-over)
 
 ### 1. Shared Persistence Utility
 5 services repeat load/save/ensureDir pattern:
@@ -40,8 +99,8 @@
 
 **Fix:** Extract `FilePersistenceUtil` or base class
 
-### 2. Mute Duration Permissions Not Declared in plugin.yml
-`lochat.mute.dur.5m`, `lochat.mute.dur.3h`, `lochat.mute.reason.*` — used in code/configs but missing from plugin.yml declarations.
+### 2. Persist nicknames on change
+`NickServiceImpl.java:77` mutates only in-memory map; `save()` only on shutdown → nicknames lost on crash (async save after mutation).
 
 ### 3. DIP: Service Locator Anti-Pattern
 `ServiceRegistry.get(Xxx.class)` used everywhere instead of constructor DI. Big refactor.
@@ -49,20 +108,17 @@
 ### 4. DRY: PM Send Logic Duplicated
 `MsgCommand` + `ReplyCommand` still have near-identical send logic.
 
-### 5. PM Send Logic Duplicated Between MsgCommand and ReplyCommand
+### 5. Fix cooldown map collision
+`PlayerServiceImpl.java:80-82` — all non-global types (local chat + RP `/me /do /try /roll`) share one map → cross-blocking cooldowns. Split per-type maps.
 
----
+### 6. Thread-safe flood/spam deques
+`FloodFilter.java:32`, `SpamFilter.java:30` use plain `ArrayDeque` written from async threads, read from main → use synchronized/thread-safe structures.
 
-## 🔵 LOW PRIORITY
+### 7. Tests
+Only 11 test files for 155 main files. Very low coverage (JaCoCo wired, CI uploads report).
 
-### 6. Tests
-Only 4 test files for 150+ main files. Very low coverage.
-
-### 7. Aho-Corasick for Swear Filter
-Performance optimization for word filtering.
-
-### 8. Discord Rate Limiter
-Prevent rate limiting when sending many webhook messages.
+### 8. No PM cooldown
+`chat.pm.cooldown: 2` in config.yml is never read → `/msg` spam unthrottled.
 
 ---
 

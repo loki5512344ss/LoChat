@@ -47,8 +47,10 @@ public class ServiceRegistry {
         PlayerService playerService = new PlayerServiceImpl(plugin);
         register(PlayerService.class, playerService);
 
-        register(ChatService.class, new ChatServiceImpl(plugin));
-        register(MessageService.class, new MessageServiceImpl(plugin, muteService, playerService));
+        MessageService messageService = new MessageServiceImpl(plugin, muteService, playerService);
+        register(MessageService.class, messageService);
+
+        register(ChatService.class, new ChatServiceImpl(plugin, messageService));
 
         PrivateMessageServiceImpl pmService = new PrivateMessageServiceImpl((LoChat) plugin);
         MessagingService messagingService = ServiceFactory.createMessagingService(plugin, messageConfig, pmService);

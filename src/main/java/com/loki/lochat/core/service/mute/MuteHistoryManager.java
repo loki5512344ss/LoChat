@@ -7,18 +7,27 @@ import com.loki.lochat.config.RatConfig;
 import com.loki.lochat.data.model.MuteData;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MuteHistoryManager {
+
+    private static final ConcurrentHashMap<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
 
     private final Map<UUID, List<MuteData.MuteHistoryEntry>> history = new ConcurrentHashMap<>();
     private final File historyFile;
@@ -86,10 +95,35 @@ public class MuteHistoryManager {
     }
 
     public void save() {
-        try (FileWriter writer = new FileWriter(historyFile)) {
-            gson.toJson(history, writer);
+        ReentrantLock lock = FILE_LOCKS.computeIfAbsent(
+                historyFile.getAbsolutePath(), k -> new ReentrantLock());
+        lock.lock();
+        try {
+            File parent = historyFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+            File tmp = parent != null
+                    ? new File(parent, historyFile.getName() + ".tmp")
+                    : new File(historyFile.getName() + ".tmp");
+            try (Writer writer = new OutputStreamWriter(
+                    new FileOutputStream(tmp), StandardCharsets.UTF_8)) {
+                gson.toJson(history, writer);
+            }
+            moveIntoPlace(tmp);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to save mute history: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void moveIntoPlace(File tmp) throws IOException {
+        try {
+            Files.move(tmp.toPath(), historyFile.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(tmp.toPath(), historyFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
