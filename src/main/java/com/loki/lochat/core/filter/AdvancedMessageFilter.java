@@ -26,6 +26,7 @@ public class AdvancedMessageFilter {
     private final SpamFilter spamFilter;
     private final UrlFilter urlFilter;
     private final CharacterFilter characterFilter;
+    private final FilterStatistics statistics = new FilterStatistics();
 
     public AdvancedMessageFilter(FileConfiguration config, JavaPlugin plugin) {
         this.filtersConfig = resolveFiltersConfig(plugin);
@@ -72,6 +73,7 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isCapsEnabled()) {
             String filtered = capsFilter.filter(player, message);
             if (filtered == null) {
+                statistics.increment("caps");
                 return FilterResult.blocked("&#CF6679Не кричите в чате");
             }
             message = filtered;
@@ -81,6 +83,7 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isSwearEnabled() && !canBypassFilter(player, "swear")) {
             FilterResult swear = swearFilter.filter(player, message);
             if (!swear.allowed()) {
+                statistics.increment("swear");
                 return swear;
             }
             message = swear.filteredMessage();
@@ -90,12 +93,14 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isAdvertisingEnabled()) {
             FilterResult r = urlFilter.filterUrls(player, message);
             if (!r.allowed()) {
+                statistics.increment("url");
                 return r;
             }
             message = r.filteredMessage();
 
             r = urlFilter.filterHiddenUrls(player, message);
             if (!r.allowed()) {
+                statistics.increment("hidden-url");
                 return r;
             }
         }
@@ -104,6 +109,7 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isIpEnabled()) {
             FilterResult r = urlFilter.filterIPs(player, message);
             if (!r.allowed()) {
+                statistics.increment("ip");
                 return r;
             }
             message = r.filteredMessage();
@@ -118,6 +124,7 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isFloodEnabled() && !canBypassFilter(player, "flood")) {
             FilterResult r = floodFilter.filter(player);
             if (!r.allowed()) {
+                statistics.increment("flood");
                 return r;
             }
         }
@@ -126,11 +133,19 @@ public class AdvancedMessageFilter {
         if (filtersConfig.isSpamEnabled() && !canBypassFilter(player, "spam")) {
             FilterResult r = spamFilter.filter(player, message);
             if (!r.allowed()) {
+                statistics.increment("spam");
                 return r;
             }
         }
 
         return FilterResult.ok(message);
+    }
+
+    /**
+     * Статистика блокировок по фильтрам (с момента запуска).
+     */
+    public FilterStatistics getStatistics() {
+        return statistics;
     }
 
     /**

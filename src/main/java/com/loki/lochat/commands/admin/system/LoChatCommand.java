@@ -31,6 +31,7 @@ public class LoChatCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatFormatter.parse("&#7858E9LoChat &#B798A8v" + plugin.getPluginMeta().getVersion()));
             sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat reload &#B798A8— перезагрузить конфиги"));
             sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat commands [reload] &#B798A8— кастомные команды"));
+            sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat filterstats &#B798A8— статистика фильтров чата"));
             return true;
         }
         switch (args[0].toLowerCase()) {
@@ -49,6 +50,23 @@ public class LoChatCommand implements CommandExecutor, TabCompleter {
                             ChatFormatter.parse("&#7858E9/" + c.name() + " &#B798A8(" + c.type() + ")")));
                 }
             }
+            case "filterstats" -> {
+                var filter = plugin.getChatFilter();
+                if (filter == null) {
+                    sender.sendMessage(ChatFormatter.parse("&#CF6679Фильтр чата недоступен"));
+                    break;
+                }
+                var stats = filter.getStatistics();
+                long total = stats.getTotalBlocked();
+                sender.sendMessage(ChatFormatter.parse(
+                        "&#B798A8Фильтры чата: &#9878C9заблокировано &#7858E9" + total + "&#9878C9 сообщений"));
+                if (total == 0) {
+                    sender.sendMessage(ChatFormatter.parse("&#B798A8Пока нечего показывать"));
+                    break;
+                }
+                stats.snapshot().forEach((name, count) -> sender.sendMessage(
+                        ChatFormatter.parse("&#7858E9" + name + ":&#9878C9 " + count)));
+            }
             default -> sender.sendMessage(ChatFormatter.parse("&#CF6679Неизвестная команда"));
         }
         return true;
@@ -63,7 +81,8 @@ public class LoChatCommand implements CommandExecutor, TabCompleter {
             return new ArrayList<>();
         }
         if (args.length == 1) {
-            return List.of("reload", "commands").stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
+            return List.of("reload", "commands", "filterstats").stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("commands")) {
             return List.of("reload");

@@ -72,9 +72,9 @@
 - Party chat: private groups `/party`.
 - Network channels (Bungee/Velocity) sync.
 
-### 2. Anti-swear hardening + filter statistics
-- Bypass obfuscation: `q→р` leet/Unicode substitution, repeated chars between letters, spaces/dots inside words.
-- Track filter stats (how many messages blocked per filter) → expose via command/placeholder.
+### 2. Anti-swear hardening + filter statistics ✅
+- Obfuscation bypass: `SwearNormalizer` (q→р / leet-подстановки, повторы букв «сууука», разделители внутри слова «с.у.к.а» / «с у к а») + tolerant-маскирование в replace-режиме. Single source of truth для Aho-Corasick.
+- Filter stats: `FilterStatistics` считает блокировки по каждому фильтру → `/lochat filterstats`.
 
 ### 3. Stable plugin API + API events
 - Publish `api/` modules to a repo so third-party plugins can depend on it.

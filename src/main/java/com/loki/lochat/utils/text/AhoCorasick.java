@@ -9,43 +9,6 @@ import java.util.Map;
 
 public final class AhoCorasick {
 
-    private static final Map<Character, Character> NORMALIZE = new HashMap<>();
-
-    static {
-        NORMALIZE.put('a', 'а');
-        NORMALIZE.put('A', 'А');
-        NORMALIZE.put('e', 'е');
-        NORMALIZE.put('E', 'Е');
-        NORMALIZE.put('o', 'о');
-        NORMALIZE.put('O', 'О');
-        NORMALIZE.put('p', 'р');
-        NORMALIZE.put('P', 'Р');
-        NORMALIZE.put('c', 'с');
-        NORMALIZE.put('C', 'С');
-        NORMALIZE.put('y', 'у');
-        NORMALIZE.put('Y', 'У');
-        NORMALIZE.put('x', 'х');
-        NORMALIZE.put('X', 'Х');
-        NORMALIZE.put('k', 'к');
-        NORMALIZE.put('K', 'К');
-        NORMALIZE.put('m', 'м');
-        NORMALIZE.put('M', 'М');
-        NORMALIZE.put('h', 'н');
-        NORMALIZE.put('H', 'Н');
-        NORMALIZE.put('n', 'н');
-        NORMALIZE.put('N', 'Н');
-        NORMALIZE.put('t', 'т');
-        NORMALIZE.put('T', 'Т');
-        NORMALIZE.put('b', 'в');
-        NORMALIZE.put('B', 'В');
-
-        NORMALIZE.put('@', 'а');
-        NORMALIZE.put('0', 'о');
-        NORMALIZE.put('3', 'е');
-        NORMALIZE.put('1', 'и');
-        NORMALIZE.put('6', 'б');
-    }
-
     private final Node root;
 
     public AhoCorasick(List<String> words) {
@@ -150,7 +113,7 @@ public final class AhoCorasick {
     }
 
     private static char normalize(char c) {
-        return NORMALIZE.getOrDefault(c, Character.toLowerCase(c));
+        return SwearNormalizer.normalize(c);
     }
 
     private static final class Node {
