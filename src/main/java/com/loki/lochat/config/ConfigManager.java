@@ -21,6 +21,7 @@ public class ConfigManager {
     private volatile MuteConfig muteConfig;
     private volatile FiltersConfig filtersConfig;
     private volatile SoundsConfig soundsConfig;
+    private volatile ChannelConfig channelConfig;
 
     public ConfigManager(LoChat plugin) {
         this.plugin = plugin;
@@ -33,6 +34,7 @@ public class ConfigManager {
         this.muteConfig = new MuteConfig(plugin);
         this.filtersConfig = new FiltersConfig(plugin);
         this.soundsConfig = new SoundsConfig(plugin);
+        this.channelConfig = new ChannelConfig(plugin);
 
         // Инициализируем все конфиги
         this.appearanceConfig.init();
@@ -40,6 +42,7 @@ public class ConfigManager {
         this.muteConfig.init();
         this.filtersConfig.init();
         this.soundsConfig.init();
+        this.channelConfig.init();
 
         loader.updateConfig();
     }
@@ -66,6 +69,10 @@ public class ConfigManager {
         return soundsConfig;
     }
 
+    public ChannelConfig getChannelConfig() {
+        return channelConfig;
+    }
+
     // ========== Обновление и перезагрузка ==========
 
     public synchronized void reload() {
@@ -77,6 +84,7 @@ public class ConfigManager {
         this.muteConfig.reload();
         this.filtersConfig.reload();
         this.soundsConfig.reload();
+        this.channelConfig.reload();
 
         plugin.getLogger().info("Все конфигурации успешно перезагружены");
     }

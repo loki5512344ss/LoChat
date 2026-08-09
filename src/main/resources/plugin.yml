@@ -20,6 +20,24 @@ commands:
     permission: chat.global.use
     aliases: [ п ]
 
+  join:
+    description: Join a chat channel
+    usage: /join <channel>
+    permission: chat.channel.join
+    aliases: [ войти ]
+
+  leave:
+    description: Leave the current chat channel
+    usage: /leave
+    permission: chat.channel.leave
+    aliases: [ выйти ]
+
+  channel:
+    description: View or switch chat channel
+    usage: /channel [channel|list|off]
+    permission: chat.channel.use
+    aliases: [ ch, канал, channels, каналы ]
+
   globalchat:
     description: Toggle global chat
     usage: /globalchat toggle
@@ -225,6 +243,21 @@ commands:
 permissions:
   chat.global.use:
     default: true
+  chat.channel.use:
+    description: Can use /channel
+    default: true
+  chat.channel.join:
+    description: Can use /join
+    default: true
+  chat.channel.leave:
+    description: Can use /leave
+    default: true
+  lochat.channel.staff:
+    description: Access to the staff channel
+    default: op
+  lochat.channel.trade:
+    description: Access to the trade channel
+    default: op
   chat.global.toggle:
     default: true
   chat.global.color:

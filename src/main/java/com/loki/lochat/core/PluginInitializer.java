@@ -109,7 +109,8 @@ public class PluginInitializer {
         plugin.setChatFilter(filter);
 
         plugin.getServer().getPluginManager().registerEvents(
-            new ChatEventListener(plugin, messageService, playerService, filter), plugin
+            new ChatEventListener(plugin, messageService, playerService, filter,
+                serviceRegistry.get(com.loki.lochat.api.service.ChannelService.class)), plugin
         );
         plugin.getServer().getPluginManager().registerEvents(
             new PlayerEventListener(plugin, playerService, messagingService, nickService, filter), plugin

@@ -8,7 +8,10 @@ import com.loki.lochat.commands.admin.chat.ClearChatCommand;
 import com.loki.lochat.commands.admin.chat.ClearChatConfigCommand;
 import com.loki.lochat.commands.admin.system.LoChatCommand;
 import com.loki.lochat.commands.admin.system.ReloadConfigCommand;
+import com.loki.lochat.commands.chat.ChannelCommand;
 import com.loki.lochat.commands.chat.GlobalChatCommand;
+import com.loki.lochat.commands.chat.JoinChannelCommand;
+import com.loki.lochat.commands.chat.LeaveChannelCommand;
 import com.loki.lochat.commands.chat.LocalChatCommand;
 import com.loki.lochat.commands.messaging.IgnoreCommand;
 import com.loki.lochat.commands.messaging.IgnoreListCommand;
@@ -53,6 +56,11 @@ public class CommandManager {
         // ── Чат ──────────────────────────────────────────────────────────────
         reg("g",          new GlobalChatCommand(plugin));
         reg("l",          new LocalChatCommand(plugin));
+
+        // ── Каналы ─────────────────────────────────────────────────────────────
+        regTab("join",     new JoinChannelCommand(plugin));
+        reg("leave",       new LeaveChannelCommand(plugin));
+        regTab("channel",  new ChannelCommand(plugin));
 
         // ── Личные сообщения / игнор ──────────────────────────────────────────
         reg("msg",        new MsgCommand(plugin));

@@ -1,0 +1,57 @@
+# LoChat channels
+# Channels let players choose where their chat messages go.
+#   /join <channel>          — join a channel
+#   /leave                   — leave the current channel (back to default chat)
+#   /channel [name|list|off] — view info, switch, or list channels
+#
+# Per channel:
+#   display     — icon shown before the channel name in messages
+#   prefix      — channel label
+#   color       — color of the prefix (legacy & codes or &#RRGGBB)
+#   radius      -1 = global (all players), >0 = local radius in blocks
+#   cooldown    seconds between messages in this channel (0 = off)
+#   permission  required to join/use the channel (empty = everyone)
+#   aliases     alternative names to reference the channel
+
+channels:
+  # Master switch for the channel system
+  enabled: true
+  # Default channel id: when a player is not in a joined channel, they fall back to it
+  default: "global"
+
+  list:
+    global:
+      display: "\u2726"
+      prefix: "GLOBAL"
+      color: "&b"
+      radius: -1
+      cooldown: 3
+      permission: ""
+      aliases: [ g ]
+
+    local:
+      display: "\u25C6"
+      prefix: "LOCAL"
+      color: "&d"
+      radius: 100
+      cooldown: 1
+      permission: ""
+      aliases: [ l ]
+
+    staff:
+      display: "\u2694"
+      prefix: "STAFF"
+      color: "&6"
+      radius: -1
+      cooldown: 2
+      permission: "lochat.channel.staff"
+      aliases: [ s, staffchat ]
+
+    trade:
+      display: "\u27A4"
+      prefix: "TRADE"
+      color: "&e"
+      radius: -1
+      cooldown: 5
+      permission: "lochat.channel.trade"
+      aliases: [ t, tradechat ]

@@ -66,11 +66,12 @@
 
 ## 🟡 NEXT: NEW FEATURES
 
-### 1. Channels (like VentureChat / Carbon)
-- `/join`, `/leave`, `/channel` — full channel system: global, local, staff, trade, party.
-- Per-channel colors, aliases, permissions, cooldowns, spy mode.
-- Party chat: private groups `/party`.
-- Network channels (Bungee/Velocity) sync.
+### 1. Channels (like VentureChat / Carbon) ✅
+- `/join`, `/leave`, `/channel` — full channel system: global, local, staff, trade.
+- Config-driven channels via `config/channels.yml` (emoji, colors, prefix, radius, cooldowns, permissions, aliases).
+- Chat routing: `ChatEventListener` sends to the joined channel; local radius filtering; per-channel cooldown; channel-aware `EnhancedChatRenderer`.
+- Party chat: private groups `/party` (future).
+- Network channels (Bungee/Velocity) sync (future).
 
 ### 2. Anti-swear hardening + filter statistics ✅
 - Obfuscation bypass: `SwearNormalizer` (q→р / leet-подстановки, повторы букв «сууука», разделители внутри слова «с.у.к.а» / «с у к а») + tolerant-маскирование в replace-режиме. Single source of truth для Aho-Corasick.

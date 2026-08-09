@@ -1,9 +1,11 @@
 package com.loki.lochat.renderer;
 
+import com.loki.lochat.channel.Channel;
 import com.loki.lochat.renderer.components.EmojiComponent;
 import com.loki.lochat.renderer.components.GradientBuilder;
 import com.loki.lochat.renderer.components.UrlProcessor;
 import com.loki.lochat.translate.TranslationService;
+import com.loki.lochat.utils.format.ChatFormatter;
 import com.loki.lochat.utils.format.TextFormatter;
 import com.loki.lochat.utils.player.MentionHandler;
 
@@ -33,12 +35,22 @@ public class EnhancedChatRenderer implements ChatRenderer {
 
     private final JavaPlugin plugin;
     private final boolean isGlobal;
+    private final Channel channel;
     private final MentionHandler mentionHandler;
     private final com.loki.lochat.config.ConfigManager cfg;
 
     public EnhancedChatRenderer(JavaPlugin plugin, boolean isGlobal) {
+        this(plugin, isGlobal, null);
+    }
+
+    public EnhancedChatRenderer(JavaPlugin plugin, Channel channel) {
+        this(plugin, channel.isGlobalScope(), channel);
+    }
+
+    private EnhancedChatRenderer(JavaPlugin plugin, boolean isGlobal, Channel channel) {
         this.plugin = plugin;
         this.isGlobal = isGlobal;
+        this.channel = channel;
         this.mentionHandler = new MentionHandler(plugin);
 
         com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
@@ -85,6 +97,26 @@ public class EnhancedChatRenderer implements ChatRenderer {
             "message", processed
         ));
     }
+
+    private String emojiFor() {
+        if (channel != null) {
+            return channel.display() == null ? "" : channel.display();
+        }
+        com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
+        return isGlobal ? appearanceCfg.getGlobalEmoji() : appearanceCfg.getLocalEmoji();
+    }
+
+    private String prefixText() {
+        if (channel != null) {
+            return channel.prefix() == null ? channel.id() : channel.prefix();
+        }
+        com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
+        return isGlobal ? appearanceCfg.getGlobalText() : appearanceCfg.getLocalText();
+    }
+
+    private String channelColor() {
+        return channel != null && channel.color() != null ? channel.color() : "&7";
+    }
     
     private Component buildFormattedMessage(String format, Map<String, Component> parts) {
         Component result = Component.empty();
@@ -112,8 +144,7 @@ public class EnhancedChatRenderer implements ChatRenderer {
     }
     
     private Component buildEmojiComponent() {
-        com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
-        String emoji = isGlobal ? appearanceCfg.getGlobalEmoji() : appearanceCfg.getLocalEmoji();
+        String emoji = emojiFor();
         return emoji.isEmpty() ? Component.empty() : Component.text(emoji);
     }
     
@@ -146,9 +177,11 @@ public class EnhancedChatRenderer implements ChatRenderer {
     }
 
     private Component buildPrefix() {
+        String text = prefixText();
+        if (channel != null) {
+            return ChatFormatter.parse(channelColor() + text);
+        }
         com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
-        
-        String text = isGlobal ? appearanceCfg.getGlobalText() : appearanceCfg.getLocalText();
         List<String> colors = isGlobal ? appearanceCfg.getGlobalColors() : appearanceCfg.getLocalColors();
 
         return GradientBuilder.build(text, colors);
@@ -157,7 +190,9 @@ public class EnhancedChatRenderer implements ChatRenderer {
     private Component buildSeparator() {
         com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
         String text = isGlobal ? appearanceCfg.getGlobalSeparatorText() : appearanceCfg.getLocalSeparatorText();
-        String color = isGlobal ? appearanceCfg.getGlobalSeparatorColor() : appearanceCfg.getLocalSeparatorColor();
+        String color = channel != null
+                ? channelColor()
+                : (isGlobal ? appearanceCfg.getGlobalSeparatorColor() : appearanceCfg.getLocalSeparatorColor());
         return Component.text(text, parseColor(color));
     }
 

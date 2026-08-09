@@ -1,6 +1,7 @@
 package com.loki.lochat.core.registry;
 
 import com.loki.lochat.LoChat;
+import com.loki.lochat.api.service.ChannelService;
 import com.loki.lochat.api.service.ChatService;
 import com.loki.lochat.api.service.MentionService;
 import com.loki.lochat.api.service.MessageService;
@@ -14,6 +15,7 @@ import com.loki.lochat.config.ConfigManager;
 import com.loki.lochat.config.MessageConfig;
 import com.loki.lochat.core.factory.ServiceFactory;
 import com.loki.lochat.core.service.ChatServiceImpl;
+import com.loki.lochat.core.service.ChannelServiceImpl;
 import com.loki.lochat.core.service.MentionServiceImpl;
 import com.loki.lochat.core.service.MessageServiceImpl;
 import com.loki.lochat.core.service.NickServiceImpl;
@@ -46,6 +48,8 @@ public class ServiceRegistry {
 
         PlayerService playerService = new PlayerServiceImpl(plugin);
         register(PlayerService.class, playerService);
+
+        register(ChannelService.class, new ChannelServiceImpl(configManager.getChannelConfig()));
 
         MessageService messageService = new MessageServiceImpl(plugin, muteService, playerService);
         register(MessageService.class, messageService);
