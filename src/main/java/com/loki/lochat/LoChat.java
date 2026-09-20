@@ -47,7 +47,8 @@ public final class LoChat extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        getLogger().info("Загрузка LoChat v" + getPluginMeta().getVersion() + " для Paper/Folia " + Bukkit.getMinecraftVersion() + "...");
+        com.loki.lochat.compat.Adventure.init(this);
+        getLogger().info("Загрузка LoChat v" + getDescription().getVersion() + " для Spigot " + Bukkit.getBukkitVersion() + "...");
 
         // Инициализация
         initializer = new PluginInitializer(this);
@@ -95,6 +96,7 @@ public final class LoChat extends JavaPlugin {
     @Override
     public void onDisable() {
         shutdown.shutdown(serviceRegistry, autoMessageManager, discordIntegration, gradientModule);
+        com.loki.lochat.compat.Adventure.close();
     }
 
     public void reload() {
