@@ -25,11 +25,9 @@ public class DiscordConfig {
         
         File configFile = new File(configFolder, "discord.yml");
         if (!configFile.exists()) {
-            try {
-                java.io.InputStream in = plugin.getResource("config/discord.yml");
+            try (java.io.InputStream in = plugin.getResource("config/discord.yml")) {
                 if (in != null) {
                     java.nio.file.Files.copy(in, configFile.toPath());
-                    in.close();
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to copy config/discord.yml: " + e.getMessage());

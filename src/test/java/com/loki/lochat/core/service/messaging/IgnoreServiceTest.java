@@ -30,6 +30,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void isIgnoring_notIgnored() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> ignored = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -39,6 +40,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void addIgnore_thenIsIgnoring() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -49,6 +51,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void addIgnore_duplicateReturnsFalse() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -59,6 +62,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void removeIgnore() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -70,6 +74,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void removeIgnore_notIgnored() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             assertFalse(ignoreService.removeIgnore(UUID.randomUUID(), UUID.randomUUID()));
@@ -77,6 +82,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void getIgnoredCount() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -89,6 +95,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void getIgnoredPlayers_returnsSet() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -99,6 +106,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void clearIgnores() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID player = UUID.randomUUID();
@@ -109,6 +117,7 @@ class IgnoreServiceTest {
     }
 
     @Test
+    @SuppressWarnings({"try", "PMD.UnusedLocalVariable"})
     void multiplePlayersIndepedent() {
         try (MockedStatic<com.loki.lochat.utils.platform.FoliaUtil> fu = Mockito.mockStatic(com.loki.lochat.utils.platform.FoliaUtil.class)) {
             UUID a = UUID.randomUUID();

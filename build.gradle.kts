@@ -3,6 +3,7 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0"
     jacoco
     checkstyle
+    pmd
 }
 
 group = "com.loki"
@@ -51,6 +52,37 @@ checkstyle {
 }
 
 tasks.withType<Checkstyle>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+pmd {
+    toolVersion = "7.8.0"
+    ruleSetConfig = resources.text.fromString(
+        """
+        <?xml version="1.0"?>
+        <ruleset name="LoChat PMD"
+            xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+            <description>LoChat security + best practices (no style nit)</description>
+            <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
+            <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
+            <rule ref="category/java/bestpractices.xml/PreserveStackTrace"/>
+            <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace"/>
+            <rule ref="category/java/bestpractices.xml/UseCollectionIsEmpty"/>
+            <rule ref="category/java/errorprone.xml/CloseResource"/>
+            <rule ref="category/java/errorprone.xml/BrokenNullCheck"/>
+            <rule ref="category/java/security.xml/HardCodedCryptoKey"/>
+        </ruleset>
+        """.trimIndent()
+    )
+    isIgnoreFailures = false
+}
+
+tasks.withType<org.gradle.api.plugins.quality.Pmd>().configureEach {
     reports {
         xml.required.set(true)
         html.required.set(true)

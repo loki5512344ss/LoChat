@@ -104,18 +104,19 @@ public class GradientDataManager {
                     "SELECT prefix, colors, color_enabled, prefix_enabled, "
                     + "prefix_purchased, last_color_change, last_prefix_change FROM gradient_data WHERE uuid = ?")) {
                 stmt.setString(1, uuid.toString());
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    data.setPrefix(rs.getString("prefix"));
-                    String colorsStr = rs.getString("colors");
-                    if (colorsStr != null && !colorsStr.isEmpty()) {
-                        data.setColors(List.of(colorsStr.split(",")));
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        data.setPrefix(rs.getString("prefix"));
+                        String colorsStr = rs.getString("colors");
+                        if (colorsStr != null && !colorsStr.isEmpty()) {
+                            data.setColors(List.of(colorsStr.split(",")));
+                        }
+                        data.setColorEnabled(rs.getBoolean("color_enabled"));
+                        data.setPrefixEnabled(rs.getBoolean("prefix_enabled"));
+                        data.setPrefixPurchased(rs.getBoolean("prefix_purchased"));
+                        data.setLastColorChange(rs.getLong("last_color_change"));
+                        data.setLastPrefixChange(rs.getLong("last_prefix_change"));
                     }
-                    data.setColorEnabled(rs.getBoolean("color_enabled"));
-                    data.setPrefixEnabled(rs.getBoolean("prefix_enabled"));
-                    data.setPrefixPurchased(rs.getBoolean("prefix_purchased"));
-                    data.setLastColorChange(rs.getLong("last_color_change"));
-                    data.setLastPrefixChange(rs.getLong("last_prefix_change"));
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("Ошибка загрузки gradient данных: " + e.getMessage());

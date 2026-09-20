@@ -54,6 +54,7 @@ public final class PlayerUtil {
      * @param name имя игрока
      * @return UUID игрока или null если не найден
      */
+    @SuppressWarnings("deprecation")
     public static UUID findPlayerUUID(String name) {
         // Сначала ищем онлайн игрока
         Player onlinePlayer = Bukkit.getPlayer(name);

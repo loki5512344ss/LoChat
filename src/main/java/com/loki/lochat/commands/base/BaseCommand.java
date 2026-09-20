@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Базовый класс для всех команд плагина
@@ -30,8 +31,7 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
         try {
             return executeCommand(sender, command, label, args);
         } catch (Exception e) {
-            plugin.getLogger().severe("Ошибка в команде " + command.getName() + ": " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Ошибка в команде " + command.getName() + ": " + e.getMessage(), e);
             sender.sendMessage("§cПроизошла ошибка при выполнении команды!");
             return true;
         }

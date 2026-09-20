@@ -29,6 +29,7 @@ public class ColorCommandHandler {
     /**
      * Установить цвет игроку
      */
+    @SuppressWarnings("deprecation")
     public void handleSetColor(CommandSender sender, String[] args, GradientMessages msg) {
         if (args.length < 3) {
             sender.sendMessage("§cИспользование: /aprefix setcolor <игрок> <цвет1> [цвет2] ...");
@@ -69,6 +70,7 @@ public class ColorCommandHandler {
     /**
      * Включить/выключить цвет
      */
+    @SuppressWarnings("deprecation")
     public void handleColorToggle(CommandSender sender, String[] args, boolean enable, GradientMessages msg) {
         if (args.length < 2) {
             sender.sendMessage("§cИспользование: /aprefix " + (enable ? "coloron" : "coloroff") + " <игрок>");
@@ -93,6 +95,7 @@ public class ColorCommandHandler {
     /**
      * Сбросить цвет
      */
+    @SuppressWarnings("deprecation")
     public void handleResetColor(CommandSender sender, String[] args, GradientMessages msg) {
         if (args.length < 2) {
             sender.sendMessage("§cИспользование: /aprefix resetcolor <игрок>");

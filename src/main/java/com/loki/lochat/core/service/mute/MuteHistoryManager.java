@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MuteHistoryManager {
 
@@ -112,7 +114,7 @@ public class MuteHistoryManager {
             }
             moveIntoPlace(tmp);
         } catch (IOException e) {
-            System.err.println("Failed to save mute history: " + e.getMessage());
+            Logger.getLogger(MuteHistoryManager.class.getName()).log(Level.WARNING, "Failed to save mute history", e);
         } finally {
             lock.unlock();
         }
@@ -140,7 +142,7 @@ public class MuteHistoryManager {
                 history.putAll(loaded);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(MuteHistoryManager.class.getName()).log(Level.WARNING, "Failed to load mute history", e);
         }
     }
 }

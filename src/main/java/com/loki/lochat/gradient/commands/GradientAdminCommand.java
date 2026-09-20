@@ -95,6 +95,7 @@ public class GradientAdminCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/aprefix updateall §7— обновить display names всех игроков");
     }
 
+    @SuppressWarnings("deprecation")
     private void handleInfo(CommandSender sender, String playerName, GradientMessages msg) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(playerName);
         if (!target.hasPlayedBefore() && !target.isOnline()) {

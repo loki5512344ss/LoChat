@@ -23,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
  * Слушатель событий игрока
  */
 public class PlayerEventListener implements Listener {
-    private final LoChat plugin;
     private final PlayerService playerService;
     private final MessagingService messagingService;
     private final NickService nickService;
@@ -32,7 +31,6 @@ public class PlayerEventListener implements Listener {
 
     public PlayerEventListener(LoChat plugin, PlayerService playerService, MessagingService messagingService,
                                 NickService nickService, AdvancedMessageFilter advancedFilter) {
-        this.plugin = plugin;
         this.playerService = playerService;
         this.messagingService = messagingService;
         this.nickService = nickService;

@@ -68,13 +68,13 @@ public abstract class BaseConfig {
         if (!configFile.exists()) {
             try {
                 String resourcePath = inConfigFolder ? "config/" + fileName : fileName;
-                InputStream in = plugin.getResource(resourcePath);
-                if (in != null) {
-                    Files.copy(in, configFile.toPath());
-                    in.close();
-                    plugin.getLogger().info("Created config file: " + (inConfigFolder ? "config/" : "") + fileName);
-                } else {
-                    plugin.getLogger().warning("Resource not found: " + resourcePath);
+                try (InputStream in = plugin.getResource(resourcePath)) {
+                    if (in != null) {
+                        Files.copy(in, configFile.toPath());
+                        plugin.getLogger().info("Created config file: " + (inConfigFolder ? "config/" : "") + fileName);
+                    } else {
+                        plugin.getLogger().warning("Resource not found: " + resourcePath);
+                    }
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to copy " + fileName + ": " + e.getMessage());

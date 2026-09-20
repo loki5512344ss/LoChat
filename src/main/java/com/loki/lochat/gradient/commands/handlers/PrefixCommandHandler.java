@@ -25,6 +25,7 @@ public class PrefixCommandHandler {
     /**
      * Установить префикс игроку
      */
+    @SuppressWarnings("deprecation")
     public void handleSetPrefix(CommandSender sender, String[] args, GradientMessages msg) {
         if (args.length < 3) {
             sender.sendMessage("§cИспользование: /aprefix setprefix <игрок> <префикс>");
@@ -65,6 +66,7 @@ public class PrefixCommandHandler {
     /**
      * Включить/выключить префикс
      */
+    @SuppressWarnings("deprecation")
     public void handlePrefixToggle(CommandSender sender, String[] args, boolean enable, GradientMessages msg) {
         if (args.length < 2) {
             sender.sendMessage("§cИспользование: /aprefix " + (enable ? "prefixon" : "prefixoff") + " <игрок>");
@@ -89,6 +91,7 @@ public class PrefixCommandHandler {
     /**
      * Сбросить префикс
      */
+    @SuppressWarnings("deprecation")
     public void handleResetPrefix(CommandSender sender, String[] args, GradientMessages msg) {
         if (args.length < 2) {
             sender.sendMessage("§cИспользование: /aprefix resetprefix <игрок>");

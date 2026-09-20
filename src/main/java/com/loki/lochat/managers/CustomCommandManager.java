@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class CustomCommandManager {
 
@@ -101,8 +102,7 @@ public class CustomCommandManager {
             }
 
         } catch (Exception e) {
-            plugin.getLogger().severe("Ошибка регистрации команды " + data.name() + ": " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Ошибка регистрации команды " + data.name() + ": " + e.getMessage(), e);
         }
     }
 

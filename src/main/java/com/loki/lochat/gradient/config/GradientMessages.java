@@ -37,11 +37,14 @@ public class GradientMessages {
         }
         messages = YamlConfiguration.loadConfiguration(messagesFile);
 
-        InputStream defStream = plugin.getResource("messages.yml");
-        if (defStream != null) {
-            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(defStream, StandardCharsets.UTF_8));
-            messages.setDefaults(defConfig);
+        try (InputStream defStream = plugin.getResource("messages.yml")) {
+            if (defStream != null) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
+                        new InputStreamReader(defStream, StandardCharsets.UTF_8));
+                messages.setDefaults(defConfig);
+            }
+        } catch (java.io.IOException e) {
+            plugin.getLogger().warning("Failed to load default messages.yml: " + e.getMessage());
         }
     }
 
