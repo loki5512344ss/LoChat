@@ -5,18 +5,15 @@ import com.loki.lochat.api.service.MessageService;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.api.service.PlayerService;
-import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.config.ConfigManager;
 import com.loki.lochat.config.MessageConfig;
 import com.loki.lochat.core.filter.AdvancedMessageFilter;
 import com.loki.lochat.core.registry.ServiceRegistry;
 import com.loki.lochat.gradient.GradientModule;
 import com.loki.lochat.integrations.DiscordIntegration;
-import com.loki.lochat.integrations.LibertyBansHook;
 import com.loki.lochat.integrations.PlaceholderAPIHook;
 import com.loki.lochat.listener.ChatEventListener;
 import com.loki.lochat.listener.DiscordEventListener;
-import com.loki.lochat.listener.ModerationListener;
 import com.loki.lochat.listener.PlayerEventListener;
 import com.loki.lochat.managers.AutoMessageManager;
 import com.loki.lochat.managers.CustomCommandManager;
@@ -70,9 +67,6 @@ public class PluginInitializer {
      * Инициализировать интеграции
      */
     public void initIntegrations(DiscordIntegration discordIntegration, GradientModule gradientModule) {
-        // LibertyBans
-        new LibertyBansHook(plugin);
-        
         // PlaceholderAPI
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderAPIHook(plugin).register();
@@ -103,8 +97,7 @@ public class PluginInitializer {
      */
     public AdvancedMessageFilter registerListeners(ServiceRegistry serviceRegistry, DiscordIntegration discordIntegration,
                                                      MessageService messageService, PlayerService playerService,
-                                                     MessagingService messagingService, NickService nickService,
-                                                     PunishmentService punishmentService) {
+                                                     MessagingService messagingService, NickService nickService) {
         AdvancedMessageFilter filter = new AdvancedMessageFilter(plugin.getConfig(), plugin);
         plugin.setChatFilter(filter);
 
@@ -114,9 +107,6 @@ public class PluginInitializer {
         );
         plugin.getServer().getPluginManager().registerEvents(
             new PlayerEventListener(plugin, playerService, messagingService, nickService, filter), plugin
-        );
-        plugin.getServer().getPluginManager().registerEvents(
-            new ModerationListener(punishmentService), plugin
         );
         
         // Discord listener

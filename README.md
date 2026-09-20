@@ -32,7 +32,7 @@ LoChat is a powerful Minecraft chat plugin for Paper 1.19.2+ and Folia servers. 
 | Private messages | PM system with reply support and ignore list |
 | Gradient nicknames | Up to 7 colors with built-in presets (fire, ocean, rainbow) |
 | Mentions | @player, @everyone, @here, @role with sounds |
-| Moderation | Mute, ban, warn with history, silent mode, escalation |
+| Moderation | Mute with history, silent mode, escalation |
 | Chat filters | Swear, spam, flood, CAPS, URL/IP, hidden links |
 | RP commands | /me, /do, /try, /roll with configurable radius |
 | Custom join/quit/death | Messages with weapon name and hover events |
@@ -55,8 +55,6 @@ LoChat is a powerful Minecraft chat plugin for Paper 1.19.2+ and Folia servers. 
 | `/prefix <text>` | `gradient.prefix` | Set custom prefix |
 | `/lmute <player> [time] [-s] [reason]` | `lochat.mute` | Mute player |
 | `/lunmute <player> [-s]` | `lochat.unmute` | Unmute player |
-| `/lban <player> [time] [reason]` | `lochat.ban` | Ban player |
-| `/warn <player> [reason]` | `lochat.warn` | Warn player |
 | `/chatspy` | `chat.spy` | Toggle spy mode |
 | `/clearchat` | `chat.clear` | Clear chat |
 | `/lochat reload` | `lochat.admin` | Reload config |
@@ -90,7 +88,7 @@ LoChat - мощный чат-плагин для Paper 1.19.2+ и Folia серв
 | Личные сообщения | PM с ответом и списком игнора |
 | Градиентные ники | До 7 цветов с пресетами (огонь, океан, радуга) |
 | Упоминания | @player, @everyone, @here, @role со звуками |
-| Модерация | Мут, бан, варн с историей, тихий режим, эскалация |
+| Модерация | Мут с историей, тихий режим, эскалация |
 | Фильтры чата | Мат, спам, флуд, CAPS, URL/IP, скрытые ссылки |
 | RP команды | /me, /do, /try, /roll с настраиваемым радиусом |
 | Кастомные вход/выход/смерть | Сообщения с названием оружия и hover-событиями |
@@ -109,8 +107,6 @@ LoChat - мощный чат-плагин для Paper 1.19.2+ и Folia серв
 | `/msg <игрок> <сообщение>` | `chat.pm.use` | Личное сообщение |
 | `/color <hex1> [hex2]` | `gradient.color` | Установить градиент |
 | `/lmute <игрок> [время] [-s] [причина]` | `lochat.mute` | Замутить |
-| `/lban <игрок> [время] [причина]` | `lochat.ban` | Забанить |
-| `/warn <игрок> [причина]` | `lochat.warn` | Выдать варн |
 | `/lochat reload` | `lochat.admin` | Перезагрузить конфиг |
 
 ### Зависимости

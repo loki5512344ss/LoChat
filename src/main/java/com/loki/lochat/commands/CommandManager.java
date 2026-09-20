@@ -18,15 +18,11 @@ import com.loki.lochat.commands.messaging.IgnoreListCommand;
 import com.loki.lochat.commands.messaging.MsgCommand;
 import com.loki.lochat.commands.messaging.ReplyCommand;
 import com.loki.lochat.commands.messaging.UnignoreCommand;
-import com.loki.lochat.commands.moderation.ban.BanCommand;
-import com.loki.lochat.commands.moderation.ban.UnbanCommand;
 import com.loki.lochat.commands.moderation.mute.MuteBlameCommand;
 import com.loki.lochat.commands.moderation.mute.MuteCommand;
 import com.loki.lochat.commands.moderation.mute.MuteHistoryCommand;
 import com.loki.lochat.commands.moderation.mute.MuteListCommand;
 import com.loki.lochat.commands.moderation.mute.UnmuteCommand;
-import com.loki.lochat.commands.moderation.warn.SilentWarnCommand;
-import com.loki.lochat.commands.moderation.warn.WarnCommand;
 import com.loki.lochat.commands.nick.NickCommand;
 import com.loki.lochat.commands.nick.PlayerInfoCommand;
 import com.loki.lochat.commands.rp.DoCommand;
@@ -75,10 +71,6 @@ public class CommandManager {
         reg("lmutelist",       new MuteListCommand(plugin));
         regTab("lmutehistory", new MuteHistoryCommand(plugin));
         regTab("lmuteblame",   new MuteBlameCommand(plugin));
-        regTab("warn",         new WarnCommand(plugin));
-        regTab("silentwarn",   new SilentWarnCommand(plugin));
-        regTab("lban",         new BanCommand(plugin));
-        regTab("lunban",       new UnbanCommand(plugin));
 
         // ── Ник / профиль ─────────────────────────────────────────────────────
         regTab("nick",       new NickCommand(plugin));

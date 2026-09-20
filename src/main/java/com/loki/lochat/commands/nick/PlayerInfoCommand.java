@@ -4,10 +4,7 @@ import com.loki.lochat.compat.Msg;
 
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MuteService;
-import com.loki.lochat.api.service.PunishmentService;
-import com.loki.lochat.data.model.BanRecord;
 import com.loki.lochat.data.model.MuteData;
-import com.loki.lochat.data.model.WarnEntry;
 import com.loki.lochat.utils.format.ChatFormatter;
 import com.loki.lochat.utils.player.PlayerUtil;
 
@@ -25,18 +22,16 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * /playerinfo — статистика варнов, банов и мутов
+ * /playerinfo — статистика мутов (mute-only)
  */
 public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
 
     private final LoChat plugin;
     private final MuteService muteService;
-    private final PunishmentService punishmentService;
 
     public PlayerInfoCommand(LoChat plugin) {
         this.plugin = plugin;
         this.muteService = plugin.getServiceRegistry().get(MuteService.class);
-        this.punishmentService = plugin.getServiceRegistry().get(PunishmentService.class);
     }
 
     @Override
@@ -78,31 +73,6 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
             Msg.send(sender, ChatFormatter.parse("&#9878C9⚡ &fГрадиент: " + plugin.getGradientModule().getFormattedName(target)));
         }
 
-        int warns = punishmentService.getWarnCount(uuid);
-        Msg.send(sender, ChatFormatter.parse("&#CF6679⚠ &fВарнов всего: &#7858E9" + warns));
-
-        List<WarnEntry> recent = punishmentService.getWarns(uuid);
-        int show = Math.min(5, recent.size());
-        for (int i = recent.size() - show; i < recent.size(); i++) {
-            WarnEntry w = recent.get(i);
-            String tag = w.silent ? "&#B798A8[тихий] " : "";
-            String reason = w.reason != null ? w.reason : "—";
-            long t = w.time;
-            Msg.send(sender, ChatFormatter.parse(
-                    tag + "&#9878C9• &7" + formatTime(t) + " &#B798A8от &#7858E9" + w.moderator + "&#9878C9: &f" + reason));
-        }
-
-        BanRecord ban = punishmentService.getActiveBan(uuid);
-        if (ban != null) {
-            String until = ban.isPermanent()
-                    ? "&#CF6679навсегда"
-                    : "&#7858E9" + muteService.formatTime(Math.max(0, ban.until - System.currentTimeMillis()));
-            Msg.send(sender, ChatFormatter.parse("&#CF6679🚫 &fБан: &cактивен &7(" + until + "&7)"));
-            Msg.send(sender, ChatFormatter.parse("&#B798A8Причина: &f" + (ban.reason != null ? ban.reason : "—")));
-        } else {
-            Msg.send(sender, ChatFormatter.parse("&#9878C9🚫 &fБан: &aнет"));
-        }
-
         if (muteService.isMuted(uuid)) {
             MuteData md = muteService.getMuteData(uuid);
             long rem = muteService.getRemainingTime(uuid);
@@ -121,11 +91,6 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
         }
 
         return true;
-    }
-
-    private static String formatTime(long ms) {
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm");
-        return sdf.format(new java.util.Date(ms));
     }
 
     @Override

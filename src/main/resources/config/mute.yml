@@ -132,7 +132,7 @@ auto-mute:
     duration: "1h"
     reason: "Auto-mute: advertising"
 
-# ── Punishment Escalation ──────────────────────────────────────────────────────
+# ── Mute Escalation ──────────────────────────────────────────────────────────────
 
 escalation:
   enabled: true
@@ -237,11 +237,6 @@ features:
       - "me"
       - "say"
       - "tell"
-
-  warnings:
-    enabled: true
-    max-warnings: 3
-    reset-time: 3600
 
   appeals:
     enabled: false

@@ -171,9 +171,7 @@ filters:
 moderation:
   default-mute-duration: "7d"
   default-mute-reason: "No reason specified"
-  default-ban-reason: "No reason specified"
   voice-mute-console-command: ""
-  ban-kick-message: "&cYou have been banned!\n&7Reason: &f{reason}"
 
 # ── Sounds ─────────────────────────────────────────────────────────────────────
 

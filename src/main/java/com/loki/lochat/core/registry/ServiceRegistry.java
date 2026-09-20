@@ -9,7 +9,6 @@ import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.api.service.PlayerService;
-import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.api.service.pm.PrivateMessageService;
 import com.loki.lochat.config.ConfigManager;
 import com.loki.lochat.config.MessageConfig;
@@ -20,7 +19,6 @@ import com.loki.lochat.core.service.MentionServiceImpl;
 import com.loki.lochat.core.service.MessageServiceImpl;
 import com.loki.lochat.core.service.NickServiceImpl;
 import com.loki.lochat.core.service.PlayerServiceImpl;
-import com.loki.lochat.core.service.PunishmentServiceImpl;
 import com.loki.lochat.core.service.messaging.PrivateMessageServiceImpl;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,7 +62,6 @@ public class ServiceRegistry {
 
         register(MentionService.class, new MentionServiceImpl(configManager));
         register(NickService.class, new NickServiceImpl(plugin));
-        register(PunishmentService.class, new PunishmentServiceImpl(plugin, configManager.getMessagesConfig()));
     }
 
     public <T> void register(Class<T> serviceClass, T implementation) {

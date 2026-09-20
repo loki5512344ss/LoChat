@@ -157,7 +157,7 @@ public class MessagesConfig extends BaseConfig {
         return getConfig().getString("ignore.ignore_list_header", "&#B798A8Игнорируемые игроки&#9878C9:");
     }
 
-    // ── Модерация (варны / баны) ────────────────────────────────────────────────
+    // ── Модерация ────────────────────────────────────────────────────────────────
 
     public String getModerationDefaultReason() {
         return getConfig().getString("moderation.default_reason", "Без причины");
@@ -165,64 +165,5 @@ public class MessagesConfig extends BaseConfig {
 
     public String getModerationDurationPermanent() {
         return getConfig().getString("moderation.duration_permanent", "навсегда");
-    }
-
-    /**
-     * MiniMessage + legacy &# цвета; плейсхолдеры {reason},{moderator},{duration},{player}; перевод строки \\n
-     */
-    public String getBanKickMessage() {
-        return getConfig().getString("moderation.ban_kick_message", defaultBanKick());
-    }
-
-    private String defaultBanKick() {
-        return "<gradient:#FF5555:#8B0000><bold>═══════ ДОСТУП ЗАПРЕЩЁН ═══════</bold></gradient>\n"
-                + "<gray>Вы заблокированы на этом сервере.</gray>\n"
-                + "<white>Причина: <gradient:#7858E9:#B798A8>{reason}</gradient></white>\n"
-                + "<gray>Модератор: <white>{moderator}</white></gray>\n"
-                + "<gray>Срок: <#7858E9>{duration}</#7858E9></gray>\n"
-                + "<gradient:#FF5555:#8B0000><bold>════════════════════════</bold></gradient>";
-    }
-
-    public String getWarnReceived() {
-        return getConfig().getString("moderation.warn_received", "&#CF6679⚠ Вам выдано предупреждение! &#B798A8Причина: &#7858E9{reason}");
-    }
-
-    public String getWarnStaffConfirm() {
-        return getConfig().getString("moderation.warn_staff_confirm", "&#9878C9Игроку &#7858E9{player} &#9878C9выдан"
-                + "варн. &#B798A8Причина: &#7858E9{reason}");
-    }
-
-    public String getSilentWarnStaff() {
-        return getConfig().getString("moderation.silent_warn_staff",
-                "&#B798A8[&#9878C9ТИХИЙ ВАРН&#B798A8] &#7858E9{player}&#9878C9: &#B798A8{reason}");
-    }
-
-    public String getBanUsage() {
-        return getConfig().getString("moderation.ban_usage", "&#B798A8Использование: &#7858E9/lban <ник> [время|perm] [причина]");
-    }
-
-    public String getBanConfirm() {
-        return getConfig().getString("moderation.ban_confirm", "&#9878C9Игрок &#7858E9{player} &#9878C9забанен."
-                + "&#B798A8Срок: &#7858E9{duration}");
-    }
-
-    public String getUnbanConfirm() {
-        return getConfig().getString("moderation.unban_confirm", "&#9878C9Бан снят с &#7858E9{player}");
-    }
-
-    public String getNotBanned() {
-        return getConfig().getString("moderation.not_banned", "&#CF6679Игрок не забанен!");
-    }
-
-    public String getAlreadyBanned() {
-        return getConfig().getString("moderation.already_banned", "&#CF6679Игрок уже забанен!");
-    }
-
-    public String getWarnUsage() {
-        return getConfig().getString("moderation.warn_usage", "&#B798A8Использование: &#7858E9/warn <ник> [причина]");
-    }
-
-    public String getSilentWarnUsage() {
-        return getConfig().getString("moderation.silent_warn_usage", "&#B798A8Использование: &#7858E9/silentwarn <ник> [причина]");
     }
 }

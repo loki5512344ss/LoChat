@@ -5,7 +5,6 @@ import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.api.service.PlayerService;
-import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.core.registry.ServiceRegistry;
 import com.loki.lochat.gradient.GradientModule;
 import com.loki.lochat.integrations.DiscordIntegration;
@@ -82,11 +81,6 @@ public class PluginShutdown {
             muteService.save();
         }
 
-        PunishmentService punishmentService = serviceRegistry.get(PunishmentService.class);
-        if (punishmentService != null) {
-            punishmentService.save();
-        }
-        
         // Ники
         NickService nickService = serviceRegistry.get(NickService.class);
         if (nickService != null) {

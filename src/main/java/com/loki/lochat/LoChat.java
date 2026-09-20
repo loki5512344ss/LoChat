@@ -4,7 +4,6 @@ import com.loki.lochat.api.service.MessageService;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.api.service.PlayerService;
-import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.commands.CommandManager;
 import com.loki.lochat.config.ConfigManager;
 import com.loki.lochat.config.MessageConfig;
@@ -83,8 +82,7 @@ public final class LoChat extends JavaPlugin {
             serviceRegistry.get(MessageService.class),
             serviceRegistry.get(PlayerService.class),
             serviceRegistry.get(MessagingService.class),
-            serviceRegistry.get(NickService.class),
-            serviceRegistry.get(PunishmentService.class));
+            serviceRegistry.get(NickService.class));
         initializer.registerPluginChannels();
         
         // Автосообщения
@@ -111,12 +109,6 @@ public final class LoChat extends JavaPlugin {
         }
         if (discordIntegration != null) {
             discordIntegration.reload();
-        }
-        if (serviceRegistry != null) {
-            try {
-                serviceRegistry.get(PunishmentService.class).save();
-            } catch (IllegalStateException ignored) {
-            }
         }
     }
 

@@ -106,18 +106,3 @@ general:
 moderation:
   default-reason: "No reason specified"
   duration-permanent: "permanent"
-  warn-received: "&6\u26A0 &cYou received a warning! &7Reason: &f{reason}"
-  warn-staff-confirm: "&aPlayer &f{player} &awarned. &7Reason: &f{reason}"
-  silent-warn-staff: "&8[&7SILENT&8] &f{player}&7: &7{reason}"
-  ban-usage: "&cUsage: &f/lban <player> [time|perm] [reason]"
-  ban-confirm: "&aPlayer &f{player} &abanned. &7Duration: &f{duration}"
-  unban-confirm: "&aBan lifted for &f{player}"
-  not-banned: "&cPlayer is not banned!"
-  already-banned: "&cPlayer is already banned!"
-  warn-usage: "&cUsage: &f/warn <player> [reason]"
-  silent-warn-usage: "&cUsage: &f/silentwarn <player> [reason]"
-  ban-kick-message: |
-    <red><bold>You are banned from this server.</bold></red>
-    <gray>Reason: <white>{reason}</white></gray>
-    <gray>Moderator: <white>{moderator}</white></gray>
-    <gray>Duration: <white>{duration}</white></gray>
