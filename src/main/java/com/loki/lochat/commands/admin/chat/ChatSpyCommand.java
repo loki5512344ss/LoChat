@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -27,7 +29,7 @@ public class ChatSpyCommand implements CommandExecutor {
             return true;
         }
         boolean enabled = messagingService.toggleSpy(player.getUniqueId());
-        player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get(enabled ? "spy.enabled" : "spy.disabled")));
+        Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get(enabled ? "spy.enabled" : "spy.disabled")));
         return true;
     }
 }

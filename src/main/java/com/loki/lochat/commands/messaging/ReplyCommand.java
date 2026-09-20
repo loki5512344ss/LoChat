@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.pm.PrivateMessageService;
@@ -37,23 +39,23 @@ public class ReplyCommand implements CommandExecutor {
             return true;
         }
         if (args.length == 0) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/reply <сообщение>")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/reply <сообщение>")));
             return true;
         }
 
         Optional<UUID> lastUuid = messagingService.getLastConversation(player.getUniqueId());
         if (lastUuid.isEmpty()) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.no-reply")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.no-reply")));
             return true;
         }
 
         Player target = Bukkit.getPlayer(lastUuid.get());
         if (target == null) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.player-offline")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.player-offline")));
             return true;
         }
         if (messagingService.isIgnoring(target.getUniqueId(), player.getUniqueId())) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
             return true;
         }
 

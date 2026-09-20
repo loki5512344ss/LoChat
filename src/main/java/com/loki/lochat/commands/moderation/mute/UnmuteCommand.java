@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.mute;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -30,11 +32,11 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.unmute")) {
-            sender.sendMessage(plugin.getMessageConfig().getComponent("errors.no-permission"));
+            Msg.send(sender, plugin.getMessageConfig().getComponent("errors.no-permission"));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Использование: /unmute <ник> [-s]"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Использование: /unmute <ник> [-s]"));
             return true;
         }
 
@@ -48,13 +50,13 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
             }
         }
         if (silent && !sender.hasPermission("lochat.mute.silent")) { 
-            sender.sendMessage(ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoSilentUnmutePermission())); 
+            Msg.send(sender, ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoSilentUnmutePermission())); 
             return true; 
         }
 
         UUID uuid = com.loki.lochat.utils.player.PlayerUtil.findPlayerUUID(targetName);
         if (uuid == null) {
-            sender.sendMessage(plugin.getMessageConfig().getComponent("errors.player-not-found"));
+            Msg.send(sender, plugin.getMessageConfig().getComponent("errors.player-not-found"));
             return true;
         }
 
@@ -63,22 +65,22 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
         String op = sender.getName();
 
         if (muteService.unmute(uuid, op)) {
-            sender.sendMessage(ChatFormatter.parse("&#9878C9Игрок &#7858E9" + name + " &#9878C9размучен"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9Игрок &#7858E9" + name + " &#9878C9размучен"));
             if (target != null) {
-                target.sendMessage(ChatFormatter.parse("&#9878C9Вы были &#7858E9размучены!"));
+                Msg.send(target, ChatFormatter.parse("&#9878C9Вы были &#7858E9размучены!"));
             }
             if (silent) {
                 String msg = "&#B798A8[&#9878C9ТИХО&#B798A8] &#7858E9" + name + " &#B798A8размучен &#9878C9(" + op + ")";
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p.hasPermission("lochat.mute.see-silent")) {
-                        p.sendMessage(ChatFormatter.parse(msg));
+                        Msg.send(p, ChatFormatter.parse(msg));
                     }
                 }
             } else {
-                Bukkit.broadcast(ChatFormatter.parse("&#9878C9Игрок &#7858E9" + name + " &#9878C9размучен модератором &#7858E9" + op));
+                Msg.broadcast(ChatFormatter.parse("&#9878C9Игрок &#7858E9" + name + " &#9878C9размучен модератором &#7858E9" + op));
             }
         } else {
-            sender.sendMessage(ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getPlayerNotMutedSimple()));
+            Msg.send(sender, ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getPlayerNotMutedSimple()));
         }
         return true;
     }

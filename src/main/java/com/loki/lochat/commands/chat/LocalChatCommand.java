@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChatService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -28,7 +30,7 @@ public class LocalChatCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/l <сообщение>")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/l <сообщение>")));
             return true;
         }
 

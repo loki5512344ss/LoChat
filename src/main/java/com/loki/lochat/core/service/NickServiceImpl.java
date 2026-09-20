@@ -1,5 +1,7 @@
 package com.loki.lochat.core.service;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.config.RatConfig;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -99,8 +101,9 @@ public class NickServiceImpl implements NickService {
         // Сбрасываем display
         Player onlinePlayer = Bukkit.getPlayer(player);
         if (onlinePlayer != null) {
-            onlinePlayer.displayName(Component.text(onlinePlayer.getName()));
-            onlinePlayer.playerListName(Component.text(onlinePlayer.getName()));
+            Component reset = Component.text(onlinePlayer.getName());
+            Msg.setDisplayName(onlinePlayer, reset);
+            Msg.setPlayerListName(onlinePlayer, reset);
         }
     }
 
@@ -155,12 +158,13 @@ public class NickServiceImpl implements NickService {
         if (nickname.isPresent()) {
             // Парсим ник с цветами
             Component nickComponent = ChatFormatter.parse(nickname.get());
-            player.displayName(nickComponent);
-            player.playerListName(nickComponent);
+            Msg.setDisplayName(player, nickComponent);
+            Msg.setPlayerListName(player, nickComponent);
         } else {
             // Используем обычное имя
-            player.displayName(Component.text(player.getName()));
-            player.playerListName(Component.text(player.getName()));
+            Component reset = Component.text(player.getName());
+            Msg.setDisplayName(player, reset);
+            Msg.setPlayerListName(player, reset);
         }
     }
 

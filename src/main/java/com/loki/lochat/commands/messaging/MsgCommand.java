@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.pm.PrivateMessageService;
@@ -34,25 +36,25 @@ public class MsgCommand implements CommandExecutor {
             return true;
         }
         if (args.length < 2) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/msg <ник> <сообщение>")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/msg <ник> <сообщение>")));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.player-offline")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.player-offline")));
             return true;
         }
         if (target.equals(player)) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.self")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.self")));
             return true;
         }
         if (messagingService.isIgnoring(target.getUniqueId(), player.getUniqueId())) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
             return true;
         }
         if (messagingService.isIgnoring(player.getUniqueId(), target.getUniqueId())) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("pm.ignored")));
             return true;
         }
 

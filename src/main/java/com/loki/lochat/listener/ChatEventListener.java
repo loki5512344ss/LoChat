@@ -5,21 +5,24 @@ import com.loki.lochat.api.service.ChannelService;
 import com.loki.lochat.api.service.MessageService;
 import com.loki.lochat.api.service.PlayerService;
 import com.loki.lochat.channel.Channel;
+import com.loki.lochat.compat.Msg;
 import com.loki.lochat.core.filter.AdvancedMessageFilter;
 import com.loki.lochat.core.filter.FilterResult;
 import com.loki.lochat.renderer.EnhancedChatRenderer;
 import com.loki.lochat.utils.format.ChatFormatter;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChatEventListener implements Listener {
     private final JavaPlugin plugin;
@@ -37,10 +40,10 @@ public class ChatEventListener implements Listener {
         this.channelService = channelService;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onChat(AsyncChatEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onChat(AsyncPlayerChatEvent event) {
         Player sender = event.getPlayer();
-        String rawMessage = PlainTextComponentSerializer.plainText().serialize(event.message());
+        String rawMessage = event.getMessage();
         LoChat loChat = (LoChat) plugin;
 
         // Система каналов: если игрок в присоединённом канале — маршрутизируем туда
@@ -54,7 +57,7 @@ public class ChatEventListener implements Listener {
         ChatMode mode = determineChatMode(loChat, rawMessage);
         if (mode == null) {
             event.setCancelled(true);
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Этот режим чата отключен!"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Этот режим чата отключен!"));
             return;
         }
 
@@ -62,7 +65,8 @@ public class ChatEventListener implements Listener {
         boolean isGlobal = mode.isGlobal;
 
         // Проверки: мут, кулдаун, фильтры
-        if (!processFilters(event, sender, plainMessage, isGlobal)) {
+        Component messageComponent = processFilters(event, sender, plainMessage, isGlobal);
+        if (messageComponent == null) {
             return;
         }
 
@@ -71,8 +75,17 @@ public class ChatEventListener implements Listener {
             handleLocalChat(event, sender, loChat);
         }
 
-        // Рендеринг и интеграции
-        event.renderer(new EnhancedChatRenderer(plugin, isGlobal));
+        // Рендеринг и доставка
+        EnhancedChatRenderer renderer = new EnhancedChatRenderer(plugin, isGlobal);
+        Component displayName = buildDisplayName(sender);
+        Set<Player> recipients = new HashSet<>(event.getRecipients());
+        event.setCancelled(true);
+        for (Player viewer : recipients) {
+            Component rendered = renderer.render(sender, displayName, messageComponent, viewer);
+            Msg.send(viewer, rendered);
+        }
+        Component consoleRendered = renderer.render(sender, displayName, messageComponent, null);
+        Bukkit.getConsoleSender().sendMessage(Msg.plain(consoleRendered));
         loChat.getDiscordIntegration().sendChatMessage(sender, plainMessage, isGlobal);
         recordStatistics(loChat, sender, isGlobal);
     }
@@ -80,7 +93,7 @@ public class ChatEventListener implements Listener {
     /**
      * Маршрутизация сообщения в присоединённый (не-дефолтный) канал.
      */
-    private void handleChannelChat(AsyncChatEvent event, Player sender, Channel channel, String rawMessage) {
+    private void handleChannelChat(AsyncPlayerChatEvent event, Player sender, Channel channel, String rawMessage) {
         String plainMessage = rawMessage.stripLeading();
 
         // Кулдаун канала
@@ -92,23 +105,21 @@ public class ChatEventListener implements Listener {
                 String msg = ((LoChat) plugin).getConfigManager().getMessagesConfig().getCooldownMessage()
                         .replace("{remaining}", String.valueOf(remaining));
                 event.setCancelled(true);
-                sender.sendMessage(ChatFormatter.parse(msg));
+                Msg.send(sender, ChatFormatter.parse(msg));
                 return;
             }
             playerService.setCooldown(sender.getUniqueId(), cooldownType);
         }
 
-        if (!processFilters(event, sender, plainMessage, channel.isGlobalScope())) {
+        Component messageComponent = processFilters(event, sender, plainMessage, channel.isGlobalScope());
+        if (messageComponent == null) {
             return;
         }
 
         // Радиус локального канала
         if (channel.isLocalScope()) {
             int radius = channel.radius();
-            event.viewers().removeIf(v -> {
-                if (!(v instanceof Player p)) {
-                    return false;
-                }
+            event.getRecipients().removeIf(p -> {
                 try {
                     return !com.loki.lochat.utils.player.DistanceUtil.isInRange(sender, p, radius);
                 } catch (Exception e) {
@@ -117,7 +128,16 @@ public class ChatEventListener implements Listener {
             });
         }
 
-        event.renderer(new EnhancedChatRenderer(plugin, channel));
+        EnhancedChatRenderer renderer = new EnhancedChatRenderer(plugin, channel);
+        Component displayName = buildDisplayName(sender);
+        Set<Player> recipients = new HashSet<>(event.getRecipients());
+        event.setCancelled(true);
+        for (Player viewer : recipients) {
+            Component rendered = renderer.render(sender, displayName, messageComponent, viewer);
+            Msg.send(viewer, rendered);
+        }
+        Component consoleRendered = renderer.render(sender, displayName, messageComponent, null);
+        Bukkit.getConsoleSender().sendMessage(Msg.plain(consoleRendered));
         LoChat loChat = (LoChat) plugin;
         loChat.getDiscordIntegration().sendChatMessage(sender, plainMessage, channel.isGlobalScope());
         playerService.recordMessage(sender.getUniqueId(), "channel_" + channel.id());
@@ -147,21 +167,21 @@ public class ChatEventListener implements Listener {
         return new ChatMode(isGlobal, message);
     }
 
-    private boolean processFilters(AsyncChatEvent event, Player sender, String plainMessage, boolean isGlobal) {
+    private Component processFilters(AsyncPlayerChatEvent event, Player sender, String plainMessage, boolean isGlobal) {
         LoChat loChat = (LoChat) plugin;
 
         // Мут, кулдаун
         if (!messageService.processMessage(sender, plainMessage)) {
             event.setCancelled(true);
-            return false;
+            return null;
         }
 
         // Капс, реклама, повторы
         FilterResult filterResult = advancedFilter.filterMessage(sender, plainMessage);
         if (!filterResult.allowed()) {
             event.setCancelled(true);
-            sender.sendMessage(ChatFormatter.parse(filterResult.blockReason()));
-            return false;
+            Msg.send(sender, ChatFormatter.parse(filterResult.blockReason()));
+            return null;
         }
 
         String filteredMessage = filterResult.filteredMessage();
@@ -177,17 +197,13 @@ public class ChatEventListener implements Listener {
             messageComponent = ChatFormatter.parseWithDefaultMessageColor(filteredMessage, defaultColor);
         }
 
-        event.message(messageComponent);
-        return true;
+        return messageComponent;
     }
 
-    private void handleLocalChat(AsyncChatEvent event, Player sender, LoChat loChat) {
+    private void handleLocalChat(AsyncPlayerChatEvent event, Player sender, LoChat loChat) {
         int radius = loChat.getConfigManager().getAppearanceConfig().getLocalRadius();
 
-        event.viewers().removeIf(v -> {
-            if (!(v instanceof Player p)) {
-                return false;
-            }
+        event.getRecipients().removeIf(p -> {
             try {
                 return !com.loki.lochat.utils.player.DistanceUtil.isInRange(sender, p, radius);
             } catch (Exception e) {
@@ -195,16 +211,22 @@ public class ChatEventListener implements Listener {
             }
         });
 
-        long recipients = event.viewers().stream()
-                .filter(v -> v instanceof Player p && !p.equals(sender))
+        long recipients = event.getRecipients().stream()
+                .filter(p -> !p.equals(sender))
                 .count();
 
         if (recipients == 0) {
             String msg = loChat.getConfigManager().getMessagesConfig().getNobodyHeard();
-            sender.getScheduler().run(plugin, t ->
-                    sender.sendMessage(ChatFormatter.parse(msg)), null
-            );
+            Bukkit.getScheduler().runTask(plugin, () -> Msg.send(sender, ChatFormatter.parse(msg)));
         }
+    }
+
+    private Component buildDisplayName(Player sender) {
+        String legacyName = sender.getDisplayName();
+        if (legacyName == null || legacyName.isBlank()) {
+            return Component.text(sender.getName());
+        }
+        return ChatFormatter.parse(legacyName);
     }
 
     private void recordStatistics(LoChat loChat, Player sender, boolean isGlobal) {

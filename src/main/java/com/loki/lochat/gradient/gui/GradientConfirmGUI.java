@@ -1,5 +1,7 @@
 package com.loki.lochat.gradient.gui;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.config.RatConfig;
 import com.loki.lochat.gradient.GradientModule;
 import com.loki.lochat.gradient.util.GradientUtil;
@@ -55,7 +57,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
             return;
         }
         this.inventory = Bukkit.createInventory(this, 27,
-                Component.text("Подтверждение", NamedTextColor.DARK_GRAY));
+                Msg.inventoryTitle(Component.text("Подтверждение", NamedTextColor.DARK_GRAY)));
         setupItems();
     }
 
@@ -72,7 +74,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
         String preview = buildPreview();
         // Для GUI используем LegacyComponentSerializer с поддержкой HEX
         Component previewComponent = SERIALIZER.deserialize(preview);
-        skullMeta.displayName(previewComponent.decoration(TextDecoration.ITALIC, false));
+        Msg.itemName(skullMeta, previewComponent.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
         lore.add(Component.empty());
@@ -83,7 +85,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
                     .append(Component.text(price + " PP", NamedTextColor.GOLD))
                     .decoration(TextDecoration.ITALIC, false));
         }
-        skullMeta.lore(lore);
+        Msg.itemLore(skullMeta, lore);
         head.setItemMeta(skullMeta);
         inventory.setItem(RatConfig.GUI_PREVIEW_SLOT, head);
 
@@ -93,7 +95,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
         confirmLore.add(Component.empty());
         confirmLore.add(Component.text("Нажмите для подтверждения", NamedTextColor.GREEN)
                 .decoration(TextDecoration.ITALIC, false));
-        confirmMeta.lore(confirmLore);
+        Msg.itemLore(confirmMeta, confirmLore);
         confirm.setItemMeta(confirmMeta);
         inventory.setItem(RatConfig.GUI_CONFIRM_SLOT, confirm);
 
@@ -103,7 +105,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
         cancelLore.add(Component.empty());
         cancelLore.add(Component.text("Нажмите для отмены", NamedTextColor.RED)
                 .decoration(TextDecoration.ITALIC, false));
-        cancelMeta.lore(cancelLore);
+        Msg.itemLore(cancelMeta, cancelLore);
         cancel.setItemMeta(cancelMeta);
         inventory.setItem(RatConfig.GUI_CANCEL_SLOT, cancel);
     }
@@ -187,7 +189,7 @@ public final class GradientConfirmGUI implements InventoryHolder {
     private ItemStack createItem(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(LegacyComponentSerializer.legacySection().deserialize(name)
+        Msg.itemName(meta, LegacyComponentSerializer.legacySection().deserialize(name)
                 .decoration(TextDecoration.ITALIC, false));
         item.setItemMeta(meta);
         return item;

@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.warn;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.config.MessagesConfig;
@@ -37,22 +39,22 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         MessagesConfig msg = plugin.getConfigManager().getMessagesConfig();
         if (!sender.hasPermission("lochat.warn")) {
-            sender.sendMessage(ChatFormatter.parse(msg.getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(msg.getNoPermission()));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse(msg.getWarnUsage()));
+            Msg.send(sender, ChatFormatter.parse(msg.getWarnUsage()));
             return true;
         }
 
         UUID targetUuid = PlayerUtil.findPlayerUUID(args[0]);
         if (targetUuid == null) {
-            sender.sendMessage(ChatFormatter.parse(msg.getPlayerNotFound()));
+            Msg.send(sender, ChatFormatter.parse(msg.getPlayerNotFound()));
             return true;
         }
 
         if (sender instanceof Player p && p.getUniqueId().equals(targetUuid)) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Нельзя выдать варн самому себе"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Нельзя выдать варн самому себе"));
             return true;
         }
 
@@ -65,16 +67,16 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
 
         Player targetOnline = Bukkit.getPlayer(targetUuid);
         if (targetOnline != null && targetOnline.hasPermission("lochat.bypass.warn")) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679У этого игрока защита от варнов"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679У этого игрока защита от варнов"));
             return true;
         }
 
         punishmentService.addWarn(targetUuid, name, mod, reason, false);
 
-        sender.sendMessage(ChatFormatter.parse(msg.getWarnStaffConfirm().replace("{player}", name).replace("{reason}", reason)));
+        Msg.send(sender, ChatFormatter.parse(msg.getWarnStaffConfirm().replace("{player}", name).replace("{reason}", reason)));
 
         if (targetOnline != null && targetOnline.isOnline()) {
-            targetOnline.sendMessage(ChatFormatter.parse(msg.getWarnReceived().replace("{reason}", reason)));
+            Msg.send(targetOnline, ChatFormatter.parse(msg.getWarnReceived().replace("{reason}", reason)));
         }
         return true;
     }

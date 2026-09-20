@@ -1,5 +1,7 @@
 package com.loki.lochat.core.service.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.PlayerService;
@@ -67,14 +69,14 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
                     playerSender.getUniqueId(), "pm", cooldown);
             String cooldownMessage = plugin.getConfigManager().getMessagesConfig()
                     .getCooldownMessage().replace("{remaining}", String.valueOf(remaining));
-            sender.sendMessage(ChatFormatter.parse(cooldownMessage));
+            Msg.send(sender, ChatFormatter.parse(cooldownMessage));
             return;
         }
         playerService.setCooldown(playerSender.getUniqueId(), "pm");
 
-        sender.sendMessage(ChatFormatter.formatPmSentNew(
+        Msg.send(sender, ChatFormatter.formatPmSentNew(
                 plugin.getMessageConfig().getPmFormatSent(), playerSender, target, message));
-        target.sendMessage(ChatFormatter.formatPmReceivedNew(
+        Msg.send(target, ChatFormatter.formatPmReceivedNew(
                 plugin.getMessageConfig().getPmFormatReceived(), playerSender, target, message));
         if (plugin.getConfigManager().isPmSoundEnabled()) {
             Sound sound = PlayerUtil.parseSound(plugin.getConfigManager().getPmSoundType(), null);

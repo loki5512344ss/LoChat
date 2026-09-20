@@ -12,9 +12,7 @@ public class PlaceholderProcessor {
         
         // Базовые плейсхолдеры
         result = result.replace("{player}", player.getName());
-        result = result.replace("{displayname}",
-                net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
-                        .serialize(player.displayName()));
+        result = result.replace("{displayname}", player.getDisplayName());
         result = result.replace("{world}", player.getWorld().getName());
         result = result.replace("{x}", String.valueOf(player.getLocation().getBlockX()));
         result = result.replace("{y}", String.valueOf(player.getLocation().getBlockY()));

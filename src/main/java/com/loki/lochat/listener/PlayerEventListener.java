@@ -4,11 +4,10 @@ import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.api.service.PlayerService;
+import com.loki.lochat.compat.Msg;
 import com.loki.lochat.config.ConfigManager;
 import com.loki.lochat.core.filter.AdvancedMessageFilter;
 import com.loki.lochat.utils.format.ChatFormatter;
-
-import net.kyori.adventure.text.Component;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -52,7 +51,8 @@ public class PlayerEventListener implements Listener {
         if (configManager.isJoinMessageEnabled()) {
             String format = configManager.getJoinMessageFormat();
             String message = format.replace("{player}", player.getName());
-            event.joinMessage(ChatFormatter.parse(message));
+            event.setJoinMessage(null);
+            Msg.broadcast(ChatFormatter.parse(message));
         }
     }
 
@@ -72,7 +72,8 @@ public class PlayerEventListener implements Listener {
         if (configManager.isQuitMessageEnabled()) {
             String format = configManager.getQuitMessageFormat();
             String message = format.replace("{player}", player.getName());
-            event.quitMessage(ChatFormatter.parse(message));
+            event.setQuitMessage(null);
+            Msg.broadcast(ChatFormatter.parse(message));
         }
     }
 
@@ -82,25 +83,25 @@ public class PlayerEventListener implements Listener {
             return;
         }
 
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         Player killer = player.getKiller();
-        
+
         String message;
-        
+
         if (killer != null) {
             // Убийство игроком
             ItemStack weapon = killer.getInventory().getItemInMainHand();
             String weaponName = getWeaponName(weapon);
-            
+
             message = configManager.getDeathPlayerKillFormat()
                 .replace("{player}", player.getName())
                 .replace("{killer}", killer.getName())
                 .replace("{weapon}", weaponName);
         } else {
             // Проверяем убийцу-моба
-            Entity lastDamager = player.getLastDamageCause() != null ? 
-                player.getLastDamageCause().getEntity() : null;
-            
+            Entity lastDamager = player.getLastDamageCause() != null
+                ? player.getLastDamageCause().getEntity() : null;
+
             if (lastDamager instanceof LivingEntity mob && !(lastDamager instanceof Player)) {
                 String mobName = getMobName(mob);
                 message = configManager.getDeathMobKillFormat()
@@ -108,32 +109,36 @@ public class PlayerEventListener implements Listener {
                     .replace("{killer}", mobName);
             } else {
                 // Обычная смерть
-                Component deathMsg = event.deathMessage();
-                String deathText = deathMsg != null ? ChatFormatter.toPlain(deathMsg) : "умер";
+                String deathMsg = event.getDeathMessage();
+                String deathText = deathMsg != null ? ChatFormatter.toPlain(ChatFormatter.parse(deathMsg)) : "умер";
                 message = configManager.getDeathDefaultFormat()
                     .replace("{player}", player.getName())
                     .replace("{death_message}", deathText);
             }
         }
-        
-        event.deathMessage(ChatFormatter.parse(message));
+
+        event.setDeathMessage(Msg.legacy(ChatFormatter.parse(message)));
     }
 
     private String getWeaponName(ItemStack item) {
         if (item == null || item.getType().isAir()) {
             return "Руки";
         }
-        
+
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return ChatFormatter.toPlain(item.getItemMeta().displayName());
+            String dn = item.getItemMeta().getDisplayName();
+            if (dn != null) {
+                return ChatFormatter.toPlain(ChatFormatter.parse(dn));
+            }
         }
-        
+
         return translateMaterial(item.getType().name());
     }
 
     private String getMobName(LivingEntity mob) {
-        if (mob.customName() != null) {
-            return ChatFormatter.toPlain(mob.customName());
+        String cn = mob.getCustomName();
+        if (cn != null) {
+            return ChatFormatter.toPlain(ChatFormatter.parse(cn));
         }
         return translateEntityType(mob.getType().name());
     }

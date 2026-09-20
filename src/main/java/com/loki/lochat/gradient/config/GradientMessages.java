@@ -1,5 +1,7 @@
 package com.loki.lochat.gradient.config;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.utils.format.ChatFormatter;
 
 import net.kyori.adventure.text.Component;
@@ -86,13 +88,13 @@ public class GradientMessages {
      * Отправляет сообщение игроку
      */
     public void send(CommandSender sender, String key) {
-        sender.sendMessage(getComponent(key));
+        Msg.send(sender, getComponent(key));
     }
 
     /**
      * Отправляет сообщение игроку с заменами
      */
     public void send(CommandSender sender, String key, String... replacements) {
-        sender.sendMessage(getComponent(key, replacements));
+        Msg.send(sender, getComponent(key, replacements));
     }
 }

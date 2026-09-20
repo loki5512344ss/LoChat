@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.rp;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.commands.base.PlayerCommand;
 import com.loki.lochat.config.RatConfig;
@@ -41,19 +43,19 @@ public class RollCommand extends PlayerCommand {
             try {
                 max = Integer.parseInt(args[0]);
                 if (max < 2) {
-                    player.sendMessage(ChatFormatter.parse(
+                    Msg.send(player, ChatFormatter.parse(
                             plugin.getConfigManager().getString("rp.roll-min-error",
                                     "<red>Минимальное значение кубика: 2</red>")));
                     return true;
                 }
                 if (max > RatConfig.ROLL_ABSOLUTE_MAX) {
-                    player.sendMessage(ChatFormatter.parse(
+                    Msg.send(player, ChatFormatter.parse(
                             plugin.getConfigManager().getString("rp.roll-max-error",
                                     "<red>Максимальное значение кубика: 1000000</red>")));
                     return true;
                 }
             } catch (NumberFormatException e) {
-                player.sendMessage(ChatFormatter.parse(
+                Msg.send(player, ChatFormatter.parse(
                         plugin.getConfigManager().getString("rp.roll-invalid-number",
                                 "<red>Укажите число: /roll [максимум]</red>")));
                 return true;

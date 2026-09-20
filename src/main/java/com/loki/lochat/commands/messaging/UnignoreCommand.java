@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -28,22 +30,22 @@ public class UnignoreCommand implements CommandExecutor {
             return true;
         }
         if (args.length == 0) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/unignore <ник>")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/unignore <ник>")));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getPlayerNotFound()));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getPlayerNotFound()));
             return true;
         }
         if (!messagingService.isIgnoring(player.getUniqueId(), target.getUniqueId())) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("ignore.not-ignored")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("ignore.not-ignored")));
             return true;
         }
 
         messagingService.removeIgnore(player.getUniqueId(), target.getUniqueId());
-        player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("ignore.removed", "{player}", target.getName())));
+        Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("ignore.removed", "{player}", target.getName())));
         return true;
     }
 }

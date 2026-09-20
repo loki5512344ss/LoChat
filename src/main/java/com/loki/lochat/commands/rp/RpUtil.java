@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.rp;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.player.DistanceUtil;
 
@@ -22,7 +24,7 @@ public final class RpUtil {
     public static void sendToRadius(Player sender, Component message, int radius) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (DistanceUtil.isInRange(sender, player, radius)) {
-                player.sendMessage(message);
+                Msg.send(player, message);
             }
         }
     }
@@ -39,8 +41,10 @@ public final class RpUtil {
         } catch (Exception ignored) {
         }
 
-        // Пробуем взять displayName (может содержать градиент от NickService)
-        Component displayName = player.displayName();
+        // Пробуем взять displayName (может содержать градиент от NickService) — Spigot: legacy String
+        String displayNameLegacy = player.getDisplayName();
+        Component displayName = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                .legacySection().deserialize(displayNameLegacy);
         String plain = PlainTextComponentSerializer.plainText().serialize(displayName);
         // Если displayName == обычное имя — возвращаем его напрямую (без потери цветов не нужно)
         if (plain.equals(player.getName())) {

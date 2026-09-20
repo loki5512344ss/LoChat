@@ -1,5 +1,7 @@
 package com.loki.lochat.gradient.util;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.gradient.GradientModule;
 import com.loki.lochat.gradient.config.GradientConfig;
 import com.loki.lochat.gradient.data.GradientPlayerData;
@@ -32,8 +34,8 @@ public final class DisplayNameUtil {
         // Конвертируем в legacy формат для display name
         displayName = convertMiniMessageToLegacy(displayName);
         var component = SERIALIZER.deserialize(displayName);
-        player.displayName(component);
-        player.playerListName(component);
+        Msg.setDisplayName(player, component);
+        Msg.setPlayerListName(player, component);
     }
 
     /**

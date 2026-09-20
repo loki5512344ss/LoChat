@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MessagingService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -33,18 +35,18 @@ public class IgnoreListCommand implements CommandExecutor {
 
         Set<UUID> ignored = messagingService.getIgnoredPlayers(player.getUniqueId());
         if (ignored.isEmpty()) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-empty")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-empty")));
             return true;
         }
 
-        player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-header")));
+        Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-header")));
         for (UUID uuid : ignored) {
             String name = PlayerUtil.getPlayerName(uuid);
             if (name != null) {
-                player.sendMessage(ChatFormatter.parse("&#9878C9◆ &f" + name));
+                Msg.send(player, ChatFormatter.parse("&#9878C9◆ &f" + name));
             }
         }
-        player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-footer")
+        Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("ignore.list-footer")
             .replace("{count}", String.valueOf(ignored.size()))));
 
         return true;

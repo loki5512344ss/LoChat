@@ -1,6 +1,7 @@
 package com.loki.lochat.renderer;
 
 import com.loki.lochat.channel.Channel;
+import com.loki.lochat.compat.Msg;
 import com.loki.lochat.renderer.components.EmojiComponent;
 import com.loki.lochat.renderer.components.GradientBuilder;
 import com.loki.lochat.renderer.components.UrlProcessor;
@@ -9,7 +10,6 @@ import com.loki.lochat.utils.format.ChatFormatter;
 import com.loki.lochat.utils.format.TextFormatter;
 import com.loki.lochat.utils.player.MentionHandler;
 
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -24,12 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.papermc.paper.chat.ChatRenderer;
-
 /**
  * Рендерер чата — глобальный и локальный режимы
  */
-public class EnhancedChatRenderer implements ChatRenderer {
+public class EnhancedChatRenderer {
 
     private static final TextColor FALLBACK_COLOR = NamedTextColor.WHITE;
 
@@ -57,20 +55,19 @@ public class EnhancedChatRenderer implements ChatRenderer {
         this.cfg = loChat.getConfigManager();
     }
 
-    @Override
-    public Component render(Player source, Component sourceDisplayName, Component message, Audience viewer) {
+    public Component render(Player source, Component sourceDisplayName, Component message, Player viewer) {
         // Обрабатываем сообщение
         Component processed = message;
         processed = TextFormatter.formatMarkdown(processed);
         processed = UrlProcessor.process(processed);
         processed = EmojiComponent.processEmojis(processed);
 
-        if (viewer instanceof Player vp) {
-            processed = mentionHandler.processMentions(processed, source, vp);
+        if (viewer != null) {
+            processed = mentionHandler.processMentions(processed, source, viewer);
             if (cfg.isTranslationEnabled()) {
                 com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
                 if (loChat.getTranslationService().isEnabled()) {
-                    sendTranslationAsync(vp, PlainTextComponentSerializer.plainText().serialize(processed));
+                    sendTranslationAsync(viewer, PlainTextComponentSerializer.plainText().serialize(processed));
                 }
             }
         }
@@ -78,15 +75,15 @@ public class EnhancedChatRenderer implements ChatRenderer {
         // Получаем формат из конфига
         com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
         String format = isGlobal ? appearanceCfg.getGlobalChatFormat() : appearanceCfg.getLocalChatFormat();
-        
+
         // Строим компоненты
         Component emoji = buildEmojiComponent();
         Component prefix = buildPrefix();
         Component separator = buildSeparator();
         Component playerPrefix = buildPlayerPrefix(source);
         Component playerSuffix = buildPlayerSuffix(source);
-        Component player = buildPlayerComponent(source);
-        
+        Component player = buildPlayerComponent(source, sourceDisplayName);
+
         return buildFormattedMessage(format, Map.of(
             "emoji", emoji,
             "prefix", prefix,
@@ -117,62 +114,62 @@ public class EnhancedChatRenderer implements ChatRenderer {
     private String channelColor() {
         return channel != null && channel.color() != null ? channel.color() : "&7";
     }
-    
+
     private Component buildFormattedMessage(String format, Map<String, Component> parts) {
         Component result = Component.empty();
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\{([^}]+)\\}");
         java.util.regex.Matcher matcher = pattern.matcher(format);
 
         int lastEnd = 0;
-        
+
         while (matcher.find()) {
             if (matcher.start() > lastEnd) {
                 result = result.append(Component.text(format.substring(lastEnd, matcher.start())));
             }
-            
+
             String placeholder = matcher.group(1);
             result = result.append(parts.getOrDefault(placeholder, Component.text("{" + placeholder + "}")));
-            
+
             lastEnd = matcher.end();
         }
-        
+
         if (lastEnd < format.length()) {
             result = result.append(Component.text(format.substring(lastEnd)));
         }
-        
+
         return result;
     }
-    
+
     private Component buildEmojiComponent() {
         String emoji = emojiFor();
         return emoji.isEmpty() ? Component.empty() : Component.text(emoji);
     }
-    
+
     private Component buildPlayerPrefix(Player player) {
         com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
         com.loki.lochat.gradient.GradientModule gradientModule = loChat.getGradientModule();
-        
+
         if (gradientModule != null && gradientModule.isEnabled()) {
             String prefix = gradientModule.getPrefix(player);
             if (!prefix.isEmpty()) {
                 return com.loki.lochat.utils.format.ChatFormatter.parse(prefix);
             }
         }
-        
+
         return Component.empty();
     }
 
     private Component buildPlayerSuffix(Player player) {
         com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
         com.loki.lochat.gradient.GradientModule gradientModule = loChat.getGradientModule();
-        
+
         if (gradientModule != null && gradientModule.isEnabled()) {
             String suffix = gradientModule.getSuffix(player);
             if (!suffix.isEmpty()) {
                 return com.loki.lochat.utils.format.ChatFormatter.parse(suffix);
             }
         }
-        
+
         return Component.empty();
     }
 
@@ -196,11 +193,11 @@ public class EnhancedChatRenderer implements ChatRenderer {
         return Component.text(text, parseColor(color));
     }
 
-    private Component buildPlayerComponent(Player player) {
-        Component displayName = player.displayName();
+    private Component buildPlayerComponent(Player player, Component sourceDisplayName) {
+        Component displayName = sourceDisplayName != null ? sourceDisplayName : Component.text(player.getName());
 
         com.loki.lochat.config.AppearanceConfig appearanceCfg = cfg.getAppearanceConfig();
-        
+
         if (!appearanceCfg.isHoverEnabled()) {
             return displayName.clickEvent(ClickEvent.suggestCommand("/msg " + player.getName() + " "));
         }
@@ -219,7 +216,7 @@ public class EnhancedChatRenderer implements ChatRenderer {
                 "&#B798A8✦ &fНажми чтобы написать"
             );
         }
-        
+
         net.kyori.adventure.text.TextComponent.Builder hoverBuilder = Component.text();
 
         for (int i = 0; i < hoverLines.size(); i++) {
@@ -248,19 +245,24 @@ public class EnhancedChatRenderer implements ChatRenderer {
         }
         com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
         TranslationService ts = loChat.getTranslationService();
-        String viewerLang = viewer.locale().getLanguage();
-        ts.translateAsync(plainText, viewerLang)
+        String localeStr = viewer.getLocale();
+        String viewerLang = "en";
+        if (localeStr != null && !localeStr.isBlank()) {
+            viewerLang = localeStr.split("[_\\-]")[0].toLowerCase();
+        }
+        final String lang = viewerLang;
+        ts.translateAsync(plainText, lang)
                 .thenAccept(translated -> {
                     if (translated.equals(plainText)) {
                         return;
                     }
-                    String langName = LANGUAGE_NAMES.getOrDefault(viewerLang, viewerLang.toUpperCase(java.util.Locale.ROOT));
+                    String langName = LANGUAGE_NAMES.getOrDefault(lang, lang.toUpperCase(java.util.Locale.ROOT));
                     Component component = Component.text()
                             .append(com.loki.lochat.utils.format.ChatFormatter.parse(
                                     "&#AAAAAA[" + langName + "]&#FFFFFF "))
                             .append(Component.text(translated))
                             .build();
-                    viewer.sendActionBar(component);
+                    Msg.actionBar(viewer, component);
                 });
     }
 

@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.system;
 
+import com.loki.lochat.compat.Msg;
+
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.loki.lochat.LoChat;
@@ -21,11 +23,11 @@ public class HubCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("general.players-only")));
+            Msg.send(sender, ChatFormatter.parse(plugin.getMessageConfig().get("general.players-only")));
             return true;
         }
         if (!plugin.getConfigManager().getBoolean("hub_command.enabled", true)) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("general.command-disabled")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("general.command-disabled")));
             return true;
         }
         String server = plugin.getConfigManager().getString("hub_command.server", "hub");
@@ -33,7 +35,7 @@ public class HubCommand implements CommandExecutor {
         out.writeUTF("Connect");
         out.writeUTF(server);
         player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
-        player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("hub.connecting").replace("%server%", server)));
+        Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("hub.connecting").replace("%server%", server)));
         return true;
     }
 }

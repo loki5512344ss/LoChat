@@ -76,7 +76,7 @@ public final class ChatFormatter {
 
     public static void sendMessage(Player player, Component component) {
         if (player != null && component != null) {
-            player.sendMessage(component);
+            com.loki.lochat.compat.Msg.send(player, component);
         }
     }
 

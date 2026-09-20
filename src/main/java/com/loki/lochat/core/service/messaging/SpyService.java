@@ -1,5 +1,7 @@
 package com.loki.lochat.core.service.messaging;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.config.MessageConfig;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -46,7 +48,7 @@ public class SpyService {
         for (UUID spyUuid : spyEnabled) {
             Player spy = Bukkit.getPlayer(spyUuid);
             if (spy != null && spy.isOnline() && !spy.equals(sender) && !spy.equals(receiver)) {
-                spy.sendMessage(ChatFormatter.parse(format
+                Msg.send(spy, ChatFormatter.parse(format
                         .replace("{sender}", sender.getName())
                         .replace("{receiver}", receiver.getName())
                         .replace("{message}", message)));
@@ -67,7 +69,7 @@ public class SpyService {
         for (UUID spyUuid : spyEnabled) {
             Player spy = Bukkit.getPlayer(spyUuid);
             if (spy != null && spy.isOnline() && !spy.equals(sender)) {
-                spy.sendMessage(ChatFormatter.parse(format
+                Msg.send(spy, ChatFormatter.parse(format
                         .replace("{type}", chatType)
                         .replace("{sender}", sender.getName())
                         .replace("{message}", plainMessage)));

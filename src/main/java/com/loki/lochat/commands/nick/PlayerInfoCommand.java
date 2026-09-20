@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.nick;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.api.service.PunishmentService;
@@ -41,17 +43,17 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.playerinfo")) {
-            sender.sendMessage(ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Использование: &#7858E9/playerinfo <ник>"));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Использование: &#7858E9/playerinfo <ник>"));
             return true;
         }
 
         UUID uuid = PlayerUtil.findPlayerUUID(args[0]);
         if (uuid == null) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Игрок не найден"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Игрок не найден"));
             return true;
         }
 
@@ -62,22 +64,22 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
 
         Player target = Bukkit.getPlayer(uuid);
 
-        sender.sendMessage(ChatFormatter.parse("<gradient:#7858E9:#B798A8><bold>═══════ Профиль: " + name + " ═══════</bold></gradient>"));
+        Msg.send(sender, ChatFormatter.parse("<gradient:#7858E9:#B798A8><bold>═══════ Профиль: " + name + " ═══════</bold></gradient>"));
 
         if (target != null) {
-            sender.sendMessage(ChatFormatter.parse("&#9878C9❤ &fЗдоровье: &#7858E9" + Math.round(target.getHealth()) + "/20"));
-            sender.sendMessage(ChatFormatter.parse("&#9878C9✦ &fРежим: &#7858E9" + target.getGameMode().name().toLowerCase()));
-            sender.sendMessage(ChatFormatter.parse("&#9878C9◆ &fМир: &#7858E9" + target.getWorld().getName()));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9❤ &fЗдоровье: &#7858E9" + Math.round(target.getHealth()) + "/20"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9✦ &fРежим: &#7858E9" + target.getGameMode().name().toLowerCase()));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9◆ &fМир: &#7858E9" + target.getWorld().getName()));
         } else {
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Игрок &#7858E9не в сети"));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Игрок &#7858E9не в сети"));
         }
 
         if (plugin.getGradientModule() != null && target != null) {
-            sender.sendMessage(ChatFormatter.parse("&#9878C9⚡ &fГрадиент: " + plugin.getGradientModule().getFormattedName(target)));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9⚡ &fГрадиент: " + plugin.getGradientModule().getFormattedName(target)));
         }
 
         int warns = punishmentService.getWarnCount(uuid);
-        sender.sendMessage(ChatFormatter.parse("&#CF6679⚠ &fВарнов всего: &#7858E9" + warns));
+        Msg.send(sender, ChatFormatter.parse("&#CF6679⚠ &fВарнов всего: &#7858E9" + warns));
 
         List<WarnEntry> recent = punishmentService.getWarns(uuid);
         int show = Math.min(5, recent.size());
@@ -86,7 +88,7 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
             String tag = w.silent ? "&#B798A8[тихий] " : "";
             String reason = w.reason != null ? w.reason : "—";
             long t = w.time;
-            sender.sendMessage(ChatFormatter.parse(
+            Msg.send(sender, ChatFormatter.parse(
                     tag + "&#9878C9• &7" + formatTime(t) + " &#B798A8от &#7858E9" + w.moderator + "&#9878C9: &f" + reason));
         }
 
@@ -95,27 +97,27 @@ public class PlayerInfoCommand implements CommandExecutor, TabCompleter {
             String until = ban.isPermanent()
                     ? "&#CF6679навсегда"
                     : "&#7858E9" + muteService.formatTime(Math.max(0, ban.until - System.currentTimeMillis()));
-            sender.sendMessage(ChatFormatter.parse("&#CF6679🚫 &fБан: &cактивен &7(" + until + "&7)"));
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Причина: &f" + (ban.reason != null ? ban.reason : "—")));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679🚫 &fБан: &cактивен &7(" + until + "&7)"));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Причина: &f" + (ban.reason != null ? ban.reason : "—")));
         } else {
-            sender.sendMessage(ChatFormatter.parse("&#9878C9🚫 &fБан: &aнет"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9🚫 &fБан: &aнет"));
         }
 
         if (muteService.isMuted(uuid)) {
             MuteData md = muteService.getMuteData(uuid);
             long rem = muteService.getRemainingTime(uuid);
             String remStr = rem < 0 ? "навсегда" : muteService.formatTime(rem);
-            sender.sendMessage(ChatFormatter.parse("&#CF6679🔇 &fМут: &cда &7(" + remStr + "&7)"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679🔇 &fМут: &cда &7(" + remStr + "&7)"));
             if (md != null) {
-                sender.sendMessage(ChatFormatter.parse("&#B798A8Причина: &f" + (md.getReason() != null ? md.getReason() : "—")));
+                Msg.send(sender, ChatFormatter.parse("&#B798A8Причина: &f" + (md.getReason() != null ? md.getReason() : "—")));
             }
         } else {
-            sender.sendMessage(ChatFormatter.parse("&#9878C9🔇 &fМут: &aнет"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9🔇 &fМут: &aнет"));
         }
 
         var muteHist = muteService.getPlayerHistory(uuid);
         if (muteHist != null && !muteHist.isEmpty()) {
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Записей в истории мутов: &#7858E9" + muteHist.size()));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Записей в истории мутов: &#7858E9" + muteHist.size()));
         }
 
         return true;

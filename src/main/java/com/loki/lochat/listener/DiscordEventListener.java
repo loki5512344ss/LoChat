@@ -2,8 +2,6 @@ package com.loki.lochat.listener;
 
 import com.loki.lochat.integrations.DiscordIntegration;
 
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,12 +54,11 @@ public class DiscordEventListener implements Listener {
         if (!discord.isEnabled()) {
             return;
         }
-        
+
         Player player = event.getEntity();
-        String deathMessage = event.deathMessage() != null ? 
-            PlainTextComponentSerializer.plainText().serialize(event.deathMessage()) : 
-            "умер";
-        
+        String raw = event.getDeathMessage();
+        String deathMessage = raw != null ? raw : "умер";
+
         discord.sendPlayerDeath(player, deathMessage);
     }
 }

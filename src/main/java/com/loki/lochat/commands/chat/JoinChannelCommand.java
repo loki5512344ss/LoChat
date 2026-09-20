@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChannelService;
 import com.loki.lochat.channel.Channel;
@@ -28,22 +30,22 @@ public class JoinChannelCommand extends PlayerCommand {
     protected boolean executePlayerCommand(@NotNull Player player, @NotNull Command command,
                                            @NotNull String label, @NotNull String[] args) {
         if (!plugin.getConfigManager().getChannelConfig().isEnabled()) {
-            player.sendMessage(ChatFormatter.parse("&#CF6679Система каналов отключена"));
+            Msg.send(player, ChatFormatter.parse("&#CF6679Система каналов отключена"));
             return true;
         }
         if (args.length == 0) {
-            player.sendMessage(ChatFormatter.parse("&#CF6679Использование: &#7858E9/join <канал>"));
+            Msg.send(player, ChatFormatter.parse("&#CF6679Использование: &#7858E9/join <канал>"));
             return true;
         }
 
         ChannelService channels = plugin.getServiceRegistry().get(ChannelService.class);
         Channel channel = channels.find(args[0]);
         if (channel == null) {
-            player.sendMessage(ChatFormatter.parse("&#CF6679Канал &#7858E9" + args[0] + " &#CF6679не найден"));
+            Msg.send(player, ChatFormatter.parse("&#CF6679Канал &#7858E9" + args[0] + " &#CF6679не найден"));
             return true;
         }
         if (!channels.canUse(player, channel)) {
-            player.sendMessage(ChatFormatter.parse(
+            Msg.send(player, ChatFormatter.parse(
                     plugin.getConfigManager().getMessagesConfig().getNoPermission()));
             return true;
         }
@@ -51,13 +53,13 @@ public class JoinChannelCommand extends PlayerCommand {
         Channel active = channels.getActive(player).orElse(null);
         channels.join(player, channel);
         if (channel.equals(channels.getDefault())) {
-            player.sendMessage(ChatFormatter.parse("&#9878C9Вы в канале [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#9878C9Вы в канале [&#7858E9"
                     + channel.display() + "&8 " + channel.prefix() + "&#9878C9] (дефолтный)"));
         } else if (channel.equals(active)) {
-            player.sendMessage(ChatFormatter.parse("&#B798A8Вы уже в канале [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#B798A8Вы уже в канале [&#7858E9"
                     + channel.display() + "&8 " + channel.prefix() + "&#B798A8]"));
         } else {
-            player.sendMessage(ChatFormatter.parse("&#9878C9Вы вошли в канал [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#9878C9Вы вошли в канал [&#7858E9"
                     + channel.display() + "&8 " + channel.prefix() + "&#9878C9]"));
         }
         return true;

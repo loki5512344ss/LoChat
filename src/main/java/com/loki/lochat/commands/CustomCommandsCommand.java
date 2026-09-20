@@ -1,5 +1,7 @@
 package com.loki.lochat.commands;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.managers.CustomCommandManager;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -28,7 +30,7 @@ public class CustomCommandsCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lochat.customcommands")) {
-            sender.sendMessage(ChatFormatter.parse("<#F44336>❌ У вас нет прав для использования этой команды!"));
+            Msg.send(sender, ChatFormatter.parse("<#F44336>❌ У вас нет прав для использования этой команды!"));
             return true;
         }
 
@@ -42,14 +44,14 @@ public class CustomCommandsCommand implements CommandExecutor, TabCompleter {
             case "reload" -> reloadCommands(sender);
             case "enable" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(ChatFormatter.parse("<#FFA726>⚠️ Использование: /customcommands enable <команда>"));
+                    Msg.send(sender, ChatFormatter.parse("<#FFA726>⚠️ Использование: /customcommands enable <команда>"));
                     return true;
                 }
                 toggleCommand(sender, args[1], true);
             }
             case "disable" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(ChatFormatter.parse("<#FFA726>⚠️ Использование: /customcommands disable <команда>"));
+                    Msg.send(sender, ChatFormatter.parse("<#FFA726>⚠️ Использование: /customcommands disable <команда>"));
                     return true;
                 }
                 toggleCommand(sender, args[1], false);
@@ -73,7 +75,7 @@ public class CustomCommandsCommand implements CommandExecutor, TabCompleter {
                 
                 <gradient:#FFD700:#FFA500><bold>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</bold></gradient>
                 """);
-        sender.sendMessage(message);
+        Msg.send(sender, message);
     }
 
     private void showCommandsList(CommandSender sender) {
@@ -91,21 +93,21 @@ public class CustomCommandsCommand implements CommandExecutor, TabCompleter {
         }
 
         message.append(ChatFormatter.parse("\n<gradient:#FFD700:#FFA500><bold>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</bold></gradient>"));
-        sender.sendMessage(message.build());
+        Msg.send(sender, message.build());
     }
 
     private void reloadCommands(CommandSender sender) {
         try {
             commandManager.reload();
-            sender.sendMessage(ChatFormatter.parse("<#4CAF50>✅ Кастомные команды успешно перезагружены!"));
+            Msg.send(sender, ChatFormatter.parse("<#4CAF50>✅ Кастомные команды успешно перезагружены!"));
         } catch (Exception e) {
-            sender.sendMessage(ChatFormatter.parse("<#F44336>❌ Ошибка при перезагрузке команд: " + e.getMessage()));
+            Msg.send(sender, ChatFormatter.parse("<#F44336>❌ Ошибка при перезагрузке команд: " + e.getMessage()));
             plugin.getLogger().severe("Ошибка перезагрузки кастомных команд: " + e.getMessage());
         }
     }
 
     private void toggleCommand(CommandSender sender, String commandName, boolean enable) {
-        sender.sendMessage(ChatFormatter.parse(
+        Msg.send(sender, ChatFormatter.parse(
                 "<#FFA726>⚠️ Для изменения статуса команд отредактируйте файл custom-commands.yml и выполните /customcommands reload"
         ));
     }

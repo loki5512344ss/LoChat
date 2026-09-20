@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.rp;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.PlayerService;
 import com.loki.lochat.commands.base.PlayerCommand;
@@ -40,7 +42,7 @@ public class TryCommand extends PlayerCommand {
             int remaining = playerService.getRemainingCooldown(player.getUniqueId(), "rp_try", cooldown);
             String msg = plugin.getConfigManager().getMessagesConfig().getCooldownMessage()
                 .replace("{remaining}", String.valueOf(remaining));
-            player.sendMessage(ChatFormatter.parse(msg));
+            Msg.send(player, ChatFormatter.parse(msg));
             return true;
         }
 

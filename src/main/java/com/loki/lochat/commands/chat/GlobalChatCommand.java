@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChatService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -30,16 +32,16 @@ public class GlobalChatCommand implements CommandExecutor {
         if (command.getName().equalsIgnoreCase("globalchat")) {
             if (args.length > 0 && args[0].equalsIgnoreCase("toggle")) {
                 boolean enabled = chatService.toggleGlobalChat(player.getUniqueId());
-                player.sendMessage(ChatFormatter.parse(
+                Msg.send(player, ChatFormatter.parse(
                         plugin.getMessageConfig().get(enabled ? "global.toggled-on" : "global.toggled-off")));
             } else {
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/globalchat toggle")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/globalchat toggle")));
             }
             return true;
         }
 
         if (args.length == 0) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/g <сообщение>")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getInvalidUsage("/g <сообщение>")));
             return true;
         }
 

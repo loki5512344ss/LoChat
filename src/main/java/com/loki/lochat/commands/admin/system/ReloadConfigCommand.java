@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.system;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -19,14 +21,14 @@ public class ReloadConfigCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.admin.reload")) {
-            sender.sendMessage(ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
             return true;
         }
         try {
             plugin.reload();
-            sender.sendMessage(ChatFormatter.parse("&#9878C9Все конфигурации &#7858E9успешно перезагружены!"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9Все конфигурации &#7858E9успешно перезагружены!"));
         } catch (Exception e) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Ошибка при перезагрузке: " + e.getMessage()));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Ошибка при перезагрузке: " + e.getMessage()));
             plugin.getLogger().severe("Ошибка при перезагрузке: " + e.getMessage());
         }
         return true;

@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -24,37 +26,37 @@ public class ClearChatConfigCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.clearchat.config")) {
-            sender.sendMessage(plugin.getMessageConfig().getComponent("errors.no-permission"));
+            Msg.send(sender, plugin.getMessageConfig().getComponent("errors.no-permission"));
             return true;
         }
         if (args.length == 0) {
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Использование: &#7858E9/clearchatconfig <enable|disable|message|status>"));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Использование: &#7858E9/clearchatconfig <enable|disable|message|status>"));
             return true;
         }
         switch (args[0].toLowerCase()) {
             case "enable"  -> {
                 plugin.getConfigManager().setClearChatMessageEnabled(true);
-                sender.sendMessage(ChatFormatter.parse("&#9878C9Сообщение очистки &#7858E9включено"));
+                Msg.send(sender, ChatFormatter.parse("&#9878C9Сообщение очистки &#7858E9включено"));
             }
             case "disable" -> {
                 plugin.getConfigManager().setClearChatMessageEnabled(false);
-                sender.sendMessage(ChatFormatter.parse("&#9878C9Сообщение очистки &#B798A8отключено"));
+                Msg.send(sender, ChatFormatter.parse("&#9878C9Сообщение очистки &#B798A8отключено"));
             }
             case "message" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(ChatFormatter.parse("&#CF6679Укажите текст!"));
+                    Msg.send(sender, ChatFormatter.parse("&#CF6679Укажите текст!"));
                     return true;
                 }
                 String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 plugin.getConfigManager().setClearChatMessage(msg);
-                sender.sendMessage(ChatFormatter.parse("&#9878C9Сообщение установлено: &f" + msg));
+                Msg.send(sender, ChatFormatter.parse("&#9878C9Сообщение установлено: &f" + msg));
             }
             case "status"  -> {
-                sender.sendMessage(ChatFormatter.parse("&#B798A8Включено: "
+                Msg.send(sender, ChatFormatter.parse("&#B798A8Включено: "
                         + (plugin.getConfigManager().isClearChatMessageEnabled() ? "&#7858E9да" : "&#CF6679нет")));
-                sender.sendMessage(ChatFormatter.parse("&#B798A8Текст: &f" + plugin.getConfigManager().getClearChatMessage()));
+                Msg.send(sender, ChatFormatter.parse("&#B798A8Текст: &f" + plugin.getConfigManager().getClearChatMessage()));
             }
-            default -> sender.sendMessage(ChatFormatter.parse("&#CF6679Неизвестный аргумент"));
+            default -> Msg.send(sender, ChatFormatter.parse("&#CF6679Неизвестный аргумент"));
         }
         return true;
     }

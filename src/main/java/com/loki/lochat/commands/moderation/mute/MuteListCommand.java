@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.mute;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.data.model.MuteData;
@@ -29,7 +31,7 @@ public class MuteListCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.mutelist")) {
-            sender.sendMessage(plugin.getMessageConfig().getComponent("errors.no-permission"));
+            Msg.send(sender, plugin.getMessageConfig().getComponent("errors.no-permission"));
             return true;
         }
 

@@ -1,6 +1,7 @@
 package com.loki.lochat.listener;
 
 import com.loki.lochat.api.service.PunishmentService;
+import com.loki.lochat.compat.Msg;
 import com.loki.lochat.data.model.BanRecord;
 
 import org.bukkit.event.EventHandler;
@@ -28,6 +29,6 @@ public class ModerationListener implements Listener {
         if (ban == null) {
             return;
         }
-        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, punishmentService.buildBanKickMessage(ban));
+        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, Msg.legacy(punishmentService.buildBanKickMessage(ban)));
     }
 }

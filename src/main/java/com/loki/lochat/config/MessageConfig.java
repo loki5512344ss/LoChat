@@ -1,5 +1,7 @@
 package com.loki.lochat.config;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -64,14 +66,14 @@ public class MessageConfig {
      * Отправляет сообщение игроку
      */
     public void send(CommandSender sender, String path) {
-        sender.sendMessage(getComponent(path));
+        Msg.send(sender, getComponent(path));
     }
 
     /**
      * Отправляет сообщение игроку с заменами
      */
     public void send(CommandSender sender, String path, String... replacements) {
-        sender.sendMessage(getComponent(path, replacements));
+        Msg.send(sender, getComponent(path, replacements));
     }
 
     // Shortcuts

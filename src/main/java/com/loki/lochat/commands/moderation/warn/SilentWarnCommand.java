@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.warn;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.config.MessagesConfig;
@@ -37,17 +39,17 @@ public class SilentWarnCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         MessagesConfig msg = plugin.getConfigManager().getMessagesConfig();
         if (!sender.hasPermission("lochat.warn.silent")) {
-            sender.sendMessage(ChatFormatter.parse(msg.getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(msg.getNoPermission()));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse(msg.getSilentWarnUsage()));
+            Msg.send(sender, ChatFormatter.parse(msg.getSilentWarnUsage()));
             return true;
         }
 
         UUID targetUuid = PlayerUtil.findPlayerUUID(args[0]);
         if (targetUuid == null) {
-            sender.sendMessage(ChatFormatter.parse(msg.getPlayerNotFound()));
+            Msg.send(sender, ChatFormatter.parse(msg.getPlayerNotFound()));
             return true;
         }
 
@@ -62,12 +64,12 @@ public class SilentWarnCommand implements CommandExecutor, TabCompleter {
 
         punishmentService.addWarn(targetUuid, name, mod, reason, true);
 
-        sender.sendMessage(ChatFormatter.parse(msg.getWarnStaffConfirm().replace("{player}", name).replace("{reason}", reason)));
+        Msg.send(sender, ChatFormatter.parse(msg.getWarnStaffConfirm().replace("{player}", name).replace("{reason}", reason)));
 
         String staffLine = msg.getSilentWarnStaff().replace("{player}", name).replace("{reason}", reason);
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (p.hasPermission("lochat.warn.notify")) {
-                p.sendMessage(ChatFormatter.parse(staffLine));
+                Msg.send(p, ChatFormatter.parse(staffLine));
             }
         }
         return true;

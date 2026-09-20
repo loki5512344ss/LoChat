@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.ban;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.PunishmentService;
 import com.loki.lochat.config.MessagesConfig;
@@ -37,22 +39,22 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         MessagesConfig msg = plugin.getConfigManager().getMessagesConfig();
         if (!sender.hasPermission("lochat.unban")) {
-            sender.sendMessage(ChatFormatter.parse(msg.getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(msg.getNoPermission()));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse("&#B798A8Использование: &#7858E9/lunban <ник>"));
+            Msg.send(sender, ChatFormatter.parse("&#B798A8Использование: &#7858E9/lunban <ник>"));
             return true;
         }
 
         UUID uuid = PlayerUtil.findPlayerUUID(args[0]);
         if (uuid == null) {
-            sender.sendMessage(ChatFormatter.parse(msg.getPlayerNotFound()));
+            Msg.send(sender, ChatFormatter.parse(msg.getPlayerNotFound()));
             return true;
         }
 
         if (!punishmentService.isBanned(uuid)) {
-            sender.sendMessage(ChatFormatter.parse(msg.getNotBanned()));
+            Msg.send(sender, ChatFormatter.parse(msg.getNotBanned()));
             return true;
         }
 
@@ -62,7 +64,7 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
         }
 
         punishmentService.unban(uuid);
-        sender.sendMessage(ChatFormatter.parse(msg.getUnbanConfirm().replace("{player}", name)));
+        Msg.send(sender, ChatFormatter.parse(msg.getUnbanConfirm().replace("{player}", name)));
         return true;
     }
 

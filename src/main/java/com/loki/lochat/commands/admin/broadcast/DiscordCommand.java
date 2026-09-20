@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.broadcast;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.integrations.DiscordIntegration;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -27,7 +29,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.discord.admin")) {
-            sender.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("errors.no-permission")));
+            Msg.send(sender, ChatFormatter.parse(plugin.getMessageConfig().get("errors.no-permission")));
             return true;
         }
         if (args.length == 0) {
@@ -35,29 +37,30 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         switch (args[0].toLowerCase()) {
-            case "status" -> sender.sendMessage(ChatFormatter.parse(
+            case "status" -> Msg.send(sender, ChatFormatter.parse(
                     discord.isEnabled() ? "&#9878C9Discord &#7858E9включён" : "&#9878C9Discord &#CF6679отключён"));
             case "reload" -> {
                 try {
                     discord.reload();
-                    sender.sendMessage(ChatFormatter.parse("&#9878C9Discord &#7858E9перезагружен"));
+                    Msg.send(sender, ChatFormatter.parse("&#9878C9Discord &#7858E9перезагружен"));
                 } catch (Exception e) {
-                    sender.sendMessage(ChatFormatter.parse("&#CF6679Ошибка: " + e.getMessage()));
+                    Msg.send(sender, ChatFormatter.parse("&#CF6679Ошибка: " + e.getMessage()));
                 }
             }
             case "test" -> {
                 if (!discord.isEnabled()) {
-                    sender.sendMessage(ChatFormatter.parse("&#CF6679Discord отключён"));
+                    Msg.send(sender, ChatFormatter.parse("&#CF6679Discord отключён"));
                     return true;
                 }
                 String msg = args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Тест от " + sender.getName();
-                sender.sendMessage(ChatFormatter.parse("&#B798A8Отправка..."));
+                Msg.send(sender, ChatFormatter.parse("&#B798A8Отправка..."));
                 java.util.concurrent.CompletableFuture.runAsync(() -> {
                     discord.sendTestMessage(msg, sender.getName());
-                    if (sender instanceof org.bukkit.entity.Player p) {
-                        p.getScheduler().run(plugin, t -> sender.sendMessage(ChatFormatter.parse("&#9878C9Отправлено &#7858E9✓")), null);
+                    if (sender instanceof org.bukkit.entity.Player) {
+                        org.bukkit.Bukkit.getScheduler().runTask(plugin,
+                                () -> Msg.send(sender, ChatFormatter.parse("&#9878C9Отправлено &#7858E9✓")));
                     } else {
-                        sender.sendMessage(ChatFormatter.parse("&#9878C9Отправлено &#7858E9✓"));
+                        Msg.send(sender, ChatFormatter.parse("&#9878C9Отправлено &#7858E9✓"));
                     }
                 });
             }
@@ -67,7 +70,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender s) {
-        s.sendMessage(ChatFormatter.parse("&#B798A8/discordadmin status|reload|test"));
+        Msg.send(s, ChatFormatter.parse("&#B798A8/discordadmin status|reload|test"));
     }
 
     @Override

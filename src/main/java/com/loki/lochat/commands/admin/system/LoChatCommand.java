@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.system;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -24,50 +26,48 @@ public class LoChatCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lochat.admin")) {
-            sender.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(plugin.getMessageConfig().getNoPermission()));
             return true;
         }
         if (args.length == 0) {
-            sender.sendMessage(ChatFormatter.parse("&#7858E9LoChat &#B798A8v" + plugin.getPluginMeta().getVersion()));
-            sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat reload &#B798A8— перезагрузить конфиги"));
-            sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat commands [reload] &#B798A8— кастомные команды"));
-            sender.sendMessage(ChatFormatter.parse("&#9878C9/lochat filterstats &#B798A8— статистика фильтров чата"));
+            Msg.send(sender, ChatFormatter.parse("&#7858E9LoChat &#B798A8v" + plugin.getDescription().getVersion()));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9/lochat reload &#B798A8— перезагрузить конфиги"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9/lochat commands [reload] &#B798A8— кастомные команды"));
+            Msg.send(sender, ChatFormatter.parse("&#9878C9/lochat filterstats &#B798A8— статистика фильтров чата"));
             return true;
         }
         switch (args[0].toLowerCase()) {
             case "reload" -> {
                 plugin.reload();
-                sender.sendMessage(ChatFormatter.parse("&#9878C9Конфигурация &#7858E9перезагружена!"));
+                Msg.send(sender, ChatFormatter.parse("&#9878C9Конфигурация &#7858E9перезагружена!"));
             }
             case "commands" -> {
                 if (args.length > 1 && args[1].equalsIgnoreCase("reload")) {
                     plugin.getCustomCommandManager().reload();
-                    sender.sendMessage(ChatFormatter.parse("&#9878C9Кастомные команды &#7858E9перезагружены!"));
+                    Msg.send(sender, ChatFormatter.parse("&#9878C9Кастомные команды &#7858E9перезагружены!"));
                 } else {
                     var cmds = plugin.getCustomCommandManager().getCommands();
-                    sender.sendMessage(ChatFormatter.parse("&#B798A8Кастомные команды &#9878C9(" + cmds.size() + "&#9878C9):"));
-                    cmds.values().forEach(c -> sender.sendMessage(
-                            ChatFormatter.parse("&#7858E9/" + c.name() + " &#B798A8(" + c.type() + ")")));
+                    Msg.send(sender, ChatFormatter.parse("&#B798A8Кастомные команды &#9878C9(" + cmds.size() + "&#9878C9):"));
+                    cmds.values().forEach(c -> Msg.send(sender, ChatFormatter.parse("&#7858E9/" + c.name() + " &#B798A8(" + c.type() + ")")));
                 }
             }
             case "filterstats" -> {
                 var filter = plugin.getChatFilter();
                 if (filter == null) {
-                    sender.sendMessage(ChatFormatter.parse("&#CF6679Фильтр чата недоступен"));
+                    Msg.send(sender, ChatFormatter.parse("&#CF6679Фильтр чата недоступен"));
                     break;
                 }
                 var stats = filter.getStatistics();
                 long total = stats.getTotalBlocked();
-                sender.sendMessage(ChatFormatter.parse(
+                Msg.send(sender, ChatFormatter.parse(
                         "&#B798A8Фильтры чата: &#9878C9заблокировано &#7858E9" + total + "&#9878C9 сообщений"));
                 if (total == 0) {
-                    sender.sendMessage(ChatFormatter.parse("&#B798A8Пока нечего показывать"));
+                    Msg.send(sender, ChatFormatter.parse("&#B798A8Пока нечего показывать"));
                     break;
                 }
-                stats.snapshot().forEach((name, count) -> sender.sendMessage(
-                        ChatFormatter.parse("&#7858E9" + name + ":&#9878C9 " + count)));
+                stats.snapshot().forEach((name, count) -> Msg.send(sender, ChatFormatter.parse("&#7858E9" + name + ":&#9878C9 " + count)));
             }
-            default -> sender.sendMessage(ChatFormatter.parse("&#CF6679Неизвестная команда"));
+            default -> Msg.send(sender, ChatFormatter.parse("&#CF6679Неизвестная команда"));
         }
         return true;
     }

@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.moderation.ban;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.api.service.PunishmentService;
@@ -41,35 +43,35 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
         MessagesConfig msg = plugin.getConfigManager().getMessagesConfig();
         if (!sender.hasPermission("lochat.ban")) {
-            sender.sendMessage(ChatFormatter.parse(msg.getNoPermission()));
+            Msg.send(sender, ChatFormatter.parse(msg.getNoPermission()));
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatFormatter.parse(msg.getBanUsage()));
-            sender.sendMessage(ChatFormatter.parse(msg.getMuteTimeHelp()));
+            Msg.send(sender, ChatFormatter.parse(msg.getBanUsage()));
+            Msg.send(sender, ChatFormatter.parse(msg.getMuteTimeHelp()));
             return true;
         }
 
         String targetName = args[0];
         UUID targetUuid = PlayerUtil.findPlayerUUID(targetName);
         if (targetUuid == null) {
-            sender.sendMessage(ChatFormatter.parse(msg.getPlayerNotFound()));
+            Msg.send(sender, ChatFormatter.parse(msg.getPlayerNotFound()));
             return true;
         }
 
         if (sender instanceof Player p && p.getUniqueId().equals(targetUuid)) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Нельзя забанить самого себя"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Нельзя забанить самого себя"));
             return true;
         }
 
         Player onlineTarget = Bukkit.getPlayer(targetUuid);
         if (onlineTarget != null && onlineTarget.hasPermission("lochat.bypass.ban") && !sender.hasPermission("lochat.ban.override")) {
-            sender.sendMessage(ChatFormatter.parse("&#CF6679Нельзя забанить этого игрока"));
+            Msg.send(sender, ChatFormatter.parse("&#CF6679Нельзя забанить этого игрока"));
             return true;
         }
 
         if (punishmentService.isBanned(targetUuid)) {
-            sender.sendMessage(ChatFormatter.parse(msg.getAlreadyBanned()));
+            Msg.send(sender, ChatFormatter.parse(msg.getAlreadyBanned()));
             return true;
         }
 
@@ -90,13 +92,13 @@ public class BanCommand implements CommandExecutor, TabCompleter {
         String durationLabel = durationMs == 0
                 ? msg.getModerationDurationPermanent()
                 : muteService.formatTime(durationMs);
-        sender.sendMessage(ChatFormatter.parse(msg.getBanConfirm().replace("{player}", finalName).replace("{duration}", durationLabel)));
+        Msg.send(sender, ChatFormatter.parse(msg.getBanConfirm().replace("{player}", finalName).replace("{duration}", durationLabel)));
 
         BanRecord ban = punishmentService.getActiveBan(targetUuid);
         if (ban != null) {
             Player kicked = Bukkit.getPlayer(targetUuid);
             if (kicked != null && kicked.isOnline()) {
-                kicked.kick(punishmentService.buildBanKickMessage(ban));
+                Msg.kick(kicked, punishmentService.buildBanKickMessage(ban));
             }
         }
         return true;
@@ -126,7 +128,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
         } else {
             durationMs = muteService.parseTime(timeStr);
             if (durationMs < 0) {
-                sender.sendMessage(ChatFormatter.parse(msg.getInvalidTime()));
+                Msg.send(sender, ChatFormatter.parse(msg.getInvalidTime()));
                 return new DurationResult(0, "", false);
             }
         }

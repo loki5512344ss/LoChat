@@ -1,5 +1,7 @@
 package com.loki.lochat.core.service;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChatService;
 import com.loki.lochat.api.service.MessageService;
@@ -52,9 +54,10 @@ public class ChatServiceImpl implements ChatService {
             return;
         }
         EnhancedChatRenderer renderer = new EnhancedChatRenderer(plugin, true);
+        Component senderDisplay = Component.text(sender.getDisplayName());
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!isGlobalChatDisabled(p.getUniqueId())) {
-                p.sendMessage(renderer.render(sender, sender.displayName(), msg, p));
+                Msg.send(p, renderer.render(sender, senderDisplay, msg, p));
             }
         }
     }
@@ -69,14 +72,15 @@ public class ChatServiceImpl implements ChatService {
         EnhancedChatRenderer renderer = new EnhancedChatRenderer(plugin, false);
 
         int count = 0;
+        Component senderDisplay2 = Component.text(sender.getDisplayName());
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (DistanceUtil.isInRange(sender, p, radius)) {
-                p.sendMessage(renderer.render(sender, sender.displayName(), msg, p));
+                Msg.send(p, renderer.render(sender, senderDisplay2, msg, p));
                 count++;
             }
         }
         if (count <= 1) {
-            sender.sendMessage(ChatFormatter.parse(
+            Msg.send(sender, ChatFormatter.parse(
                     plugin.getConfig().getString("messages.local.nobody-heard",
                             "<color:#9878C9>Вас никто не услышал — рядом нет игроков</color>")));
         }
@@ -135,7 +139,7 @@ public class ChatServiceImpl implements ChatService {
         int minLength = appearance.getMinMessageLength();
         int maxLength = appearance.getMaxMessageLength();
         if (text.length() < minLength || text.length() > maxLength) {
-            sender.sendMessage(ChatFormatter.parse(
+            Msg.send(sender, ChatFormatter.parse(
                     "&#CF6679Сообщение должно содержать от " + minLength + " до " + maxLength + " символов"));
             return null;
         }
@@ -148,7 +152,7 @@ public class ChatServiceImpl implements ChatService {
         if (filter != null) {
             FilterResult result = filter.filterMessage(sender, text);
             if (!result.allowed()) {
-                sender.sendMessage(ChatFormatter.parse(result.blockReason()));
+                Msg.send(sender, ChatFormatter.parse(result.blockReason()));
                 return null;
             }
             text = result.filteredMessage();

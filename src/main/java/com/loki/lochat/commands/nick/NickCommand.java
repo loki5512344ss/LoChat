@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.nick;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.NickService;
 import com.loki.lochat.utils.format.ChatFormatter;
@@ -29,55 +31,55 @@ public class NickCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text(plugin.getConfigManager().getMessagesConfig().getPlayerOnly(), NamedTextColor.RED));
+            Msg.send(sender, Component.text(plugin.getConfigManager().getMessagesConfig().getPlayerOnly(), NamedTextColor.RED));
             return true;
         }
         if (!player.hasPermission("lochat.nick")) {
-            player.sendMessage(ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
+            Msg.send(player, ChatFormatter.parse(plugin.getConfigManager().getMessagesConfig().getNoPermission()));
             return true;
         }
 
         if (args.length == 0) {
             var nick = nickService.getNickname(player.getUniqueId());
             if (nick.isPresent()) {
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.current", "{nick}", nick.get())));
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.reset-usage")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.current", "{nick}", nick.get())));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.reset-usage")));
             } else {
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.no-nick")));
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.set-usage")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.no-nick")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.set-usage")));
             }
             return true;
         }
 
         if (args[0].equalsIgnoreCase("reset")) {
             if (nickService.getNickname(player.getUniqueId()).isEmpty()) {
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.no-nick")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.no-nick")));
                 return true;
             }
             nickService.resetNickname(player.getUniqueId());
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.reset-success")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.reset-success")));
             return true;
         }
 
         String nickname = String.join(" ", args);
         if (!nickService.isValidNickname(nickname)) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.invalid")));
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-header")));
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-length")));
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-chars")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.invalid")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-header")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-length")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.requirements-chars")));
             return true;
         }
         if (nickService.isNicknameTaken(nickname)) {
             var cur = nickService.getNickname(player.getUniqueId());
             if (cur.isEmpty() || !cur.get().equals(nickname)) {
-                player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.taken")));
+                Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.taken")));
                 return true;
             }
         }
         if (nickService.setNickname(player.getUniqueId(), nickname)) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.set-success", "{nick}", nickname)));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.set-success", "{nick}", nickname)));
         } else {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().get("nick.error")));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().get("nick.error")));
         }
         return true;
     }

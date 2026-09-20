@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.admin.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.utils.format.ChatFormatter;
 
@@ -26,7 +28,7 @@ public class ClearChatCommand implements CommandExecutor {
                 player.sendMessage("");
             }
             if (plugin.getConfigManager().isClearChatMessageEnabled()) {
-                player.sendMessage(ChatFormatter.parse(
+                Msg.send(player, ChatFormatter.parse(
                         plugin.getConfigManager().getClearChatMessage().replace("{player}", sender.getName())));
             }
         }

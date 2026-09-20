@@ -1,5 +1,7 @@
 package com.loki.lochat.commands.chat;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.api.service.ChannelService;
 import com.loki.lochat.channel.Channel;
@@ -31,7 +33,7 @@ public class ChannelCommand extends PlayerCommand {
                                            @NotNull String label, @NotNull String[] args) {
         ChannelService channels = plugin.getServiceRegistry().get(ChannelService.class);
         if (!channels.isEnabled()) {
-            player.sendMessage(ChatFormatter.parse("&#CF6679Система каналов отключена"));
+            Msg.send(player, ChatFormatter.parse("&#CF6679Система каналов отключена"));
             return true;
         }
 
@@ -44,9 +46,9 @@ public class ChannelCommand extends PlayerCommand {
             case "off", "leave" -> {
                 if (channels.isInChannel(player)) {
                     channels.leave(player);
-                    player.sendMessage(ChatFormatter.parse("&#9878C9Вы вышли из канала"));
+                    Msg.send(player, ChatFormatter.parse("&#9878C9Вы вышли из канала"));
                 } else {
-                    player.sendMessage(ChatFormatter.parse("&#B798A8Вы не находитесь в канале"));
+                    Msg.send(player, ChatFormatter.parse("&#B798A8Вы не находитесь в канале"));
                 }
             }
             case "list" -> listChannels(player, channels);
@@ -59,22 +61,22 @@ public class ChannelCommand extends PlayerCommand {
         Channel active = channels.getActive(player).orElse(null);
         if (active == null) {
             Channel def = channels.getDefault();
-            player.sendMessage(ChatFormatter.parse("&#B798A8Вы в дефолтном канале [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#B798A8Вы в дефолтном канале [&#7858E9"
                     + (def == null ? "?" : def.display() + "&8 " + def.prefix()) + "&#B798A8]"));
         } else {
-            player.sendMessage(ChatFormatter.parse("&#9878C9Вы в канале [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#9878C9Вы в канале [&#7858E9"
                     + active.display() + "&8 " + active.prefix() + "&#9878C9]"));
         }
-        player.sendMessage(ChatFormatter.parse("&#B798A8/join <канал> &#9878C9— войти, "
+        Msg.send(player, ChatFormatter.parse("&#B798A8/join <канал> &#9878C9— войти, "
                 + "&#B798A8/channel list &#9878C9— все каналы"));
     }
 
     private void listChannels(Player player, ChannelService channels) {
-        player.sendMessage(ChatFormatter.parse("&#B798A8Доступные каналы:"));
+        Msg.send(player, ChatFormatter.parse("&#B798A8Доступные каналы:"));
         for (Channel c : channels.getChannels()) {
             boolean canUse = channels.canUse(player, c);
             boolean active = c.equals(channels.getActive(player).orElse(null));
-            player.sendMessage(ChatFormatter.parse((canUse ? "&#9878C9" : "&#CF6679")
+            Msg.send(player, ChatFormatter.parse((canUse ? "&#9878C9" : "&#CF6679")
                     + (active ? "\u25B8 " : "\u25AA ") + c.display() + "&8 " + c.prefix()
                     + (canUse ? "" : " &#CF6679(нет прав)")
                     + " &#B798A8— " + (c.isGlobalScope() ? "глобальный" : "локальный, " + c.radius() + "б")));
@@ -84,21 +86,21 @@ public class ChannelCommand extends PlayerCommand {
     private void joinChannel(Player player, ChannelService channels, String name) {
         Channel channel = channels.find(name);
         if (channel == null) {
-            player.sendMessage(ChatFormatter.parse("&#CF6679Канал &#7858E9" + name + " &#CF6679не найден"));
+            Msg.send(player, ChatFormatter.parse("&#CF6679Канал &#7858E9" + name + " &#CF6679не найден"));
             return;
         }
         if (!channels.canUse(player, channel)) {
-            player.sendMessage(ChatFormatter.parse(
+            Msg.send(player, ChatFormatter.parse(
                     plugin.getConfigManager().getMessagesConfig().getNoPermission()));
             return;
         }
         Channel active = channels.getActive(player).orElse(null);
         channels.join(player, channel);
         if (channel.equals(active)) {
-            player.sendMessage(ChatFormatter.parse("&#B798A8Вы уже в канале [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#B798A8Вы уже в канале [&#7858E9"
                     + channel.display() + "&8 " + channel.prefix() + "&#B798A8]"));
         } else {
-            player.sendMessage(ChatFormatter.parse("&#9878C9Вы вошли в канал [&#7858E9"
+            Msg.send(player, ChatFormatter.parse("&#9878C9Вы вошли в канал [&#7858E9"
                     + channel.display() + "&8 " + channel.prefix() + "&#9878C9]"));
         }
     }

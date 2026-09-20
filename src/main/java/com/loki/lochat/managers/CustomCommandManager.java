@@ -1,5 +1,7 @@
 package com.loki.lochat.managers;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.LoChat;
 import com.loki.lochat.commands.CustomCommand;
 import com.loki.lochat.managers.commands.MessageSender;
@@ -66,9 +68,29 @@ public class CustomCommandManager {
         plugin.getLogger().info("Загружено " + commands.size() + " кастомных команд");
     }
 
+    private CommandMap getCommandMap() {
+        try {
+            java.lang.reflect.Method m = Bukkit.getServer().getClass().getMethod("getCommandMap");
+            return (CommandMap) m.invoke(Bukkit.getServer());
+        } catch (Exception ignored) {
+        }
+        try {
+            java.lang.reflect.Method m2 = Bukkit.getPluginManager().getClass().getMethod("getCommandMap");
+            return (CommandMap) m2.invoke(Bukkit.getPluginManager());
+        } catch (Exception ignored) {
+        }
+        try {
+            java.lang.reflect.Field f = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
+            f.setAccessible(true);
+            return (CommandMap) f.get(Bukkit.getPluginManager());
+        } catch (Exception ex) {
+            throw new RuntimeException("Unable to get CommandMap", ex);
+        }
+    }
+
     private void registerCommand(CustomCommandData data) {
         try {
-            CommandMap commandMap = Bukkit.getCommandMap();
+            CommandMap commandMap = getCommandMap();
 
             CustomCommand command = new CustomCommand(data.name(), this);
             commandMap.register("lochat", command);
@@ -108,7 +130,7 @@ public class CustomCommandManager {
         }
 
         if (data.permission() != null && !player.hasPermission(data.permission())) {
-            player.sendMessage(ChatFormatter.parse(plugin.getMessageConfig().getNoPermission()));
+            Msg.send(player, ChatFormatter.parse(plugin.getMessageConfig().getNoPermission()));
             return true;
         }
 
@@ -126,7 +148,7 @@ public class CustomCommandManager {
 
     private void sendBungeeCommand(Player player, CustomCommandData data) {
         if (!data.message().isEmpty()) {
-            player.sendMessage(ChatFormatter.parse(data.message()));
+            Msg.send(player, ChatFormatter.parse(data.message()));
         }
         
         String serverName = getServerFromConfig(data);
@@ -157,7 +179,7 @@ public class CustomCommandManager {
             player.sendPluginMessage(plugin, "BungeeCord", b.toByteArray());
         } catch (Exception e) {
             plugin.getLogger().severe("Ошибка подключения к серверу " + serverName + ": " + e.getMessage());
-            player.sendMessage(ChatFormatter.parse("<#F44336>❌ Ошибка подключения к серверу"));
+            Msg.send(player, ChatFormatter.parse("<#F44336>❌ Ошибка подключения к серверу"));
         }
     }
 

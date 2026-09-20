@@ -1,5 +1,7 @@
 package com.loki.lochat.core.filter;
 
+import com.loki.lochat.compat.Msg;
+
 import com.loki.lochat.api.filter.MessageFilter;
 import com.loki.lochat.api.service.MuteService;
 import com.loki.lochat.config.MessagesConfig;
@@ -49,6 +51,6 @@ public class MuteFilter implements MessageFilter {
                     .replace("{time}", timeStr);
         }
 
-        player.sendMessage(ChatFormatter.parse(msg));
+        Msg.send(player, ChatFormatter.parse(msg));
     }
 }
