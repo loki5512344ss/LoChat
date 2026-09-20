@@ -1,20 +1,20 @@
 # LoChat player messages
 # All messages sent to players. Supports & color codes and placeholders.
 
-prefix: "&8[&3LoChat&8]"
+prefix: "&6Star Wars &7|"
 
 # ── Global Chat ────────────────────────────────────────────────────────────────
 
 global:
-  toggled-on: "&aGlobal chat enabled"
+  toggled-on: "&fGlobal chat enabled"
   toggled-off: "&cGlobal chat disabled"
   disabled: "&cGlobal chat is disabled on this server"
 
 # ── Local Chat ─────────────────────────────────────────────────────────────────
 
 local:
-  no-players: "&cNo players nearby"
-  nobody-heard: "&7Nobody heard you — no players nearby"
+  no-players: "&7No players nearby. Start your message with &6! &7to write to everyone."
+  nobody-heard: "&7Nobody heard you. Start your message with &6! &7to be heard everywhere."
 
 # ── Private Messages ───────────────────────────────────────────────────────────
 
@@ -29,19 +29,19 @@ pm:
 # ── Ignore List ────────────────────────────────────────────────────────────────
 
 ignore:
-  added: "&aPlayer &f{player} &ais now ignored"
-  removed: "&aPlayer &f{player} &ais no longer ignored"
-  already-ignored: "&7Player &f{player} &7is already ignored"
-  not-ignored: "&7Player &f{player} &7is not ignored"
+  added: "&fPlayer &6{player} &fis now ignored"
+  removed: "&fPlayer &6{player} &fis no longer ignored"
+  already-ignored: "&7Player &6{player} &7is already ignored"
+  not-ignored: "&7Player &6{player} &7is not ignored"
   self: "&cYou cannot ignore yourself"
   list-empty: "&7Your ignore list is empty"
   list-header: "&8\u2500\u2500\u2500\u2500\u2500 Ignored Players \u2500\u2500\u2500\u2500\u2500"
-  list-footer: "&7Total: &f{count} &7players"
+  list-footer: "&7Total: &6{count} &7players"
 
 # ── Announcements ──────────────────────────────────────────────────────────────
 
 announce:
-  reloaded: "&aConfiguration reloaded"
+  reloaded: "&fConfiguration reloaded"
 
 # ── Chat Spy ───────────────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ filter:
 # ── Cooldowns ──────────────────────────────────────────────────────────────────
 
 cooldown:
-  wait: "&cPlease wait &f{time} &cseconds"
+  wait: "&cPlease wait &6{time} &cseconds"
 
 # ── Anti-Spam ──────────────────────────────────────────────────────────────────
 
@@ -72,23 +72,23 @@ antispam:
 # ── Clear Chat ─────────────────────────────────────────────────────────────────
 
 clearchat:
-  cleared: "&aChat cleared by &f{player}"
+  cleared: "&fChat cleared by &6{player}"
 
 # ── Errors ─────────────────────────────────────────────────────────────────────
 
 errors:
   no-permission: "&cNo permission"
   player-not-found: "&cPlayer not found"
-  invalid-usage: "&cUsage: &f{usage}"
+  invalid-usage: "&cUsage: &6{usage}"
 
 # ── General ────────────────────────────────────────────────────────────────────
 
 general:
   no-permission: "&cYou don't have permission!"
   players-only: "&cThis command is for players only!"
-  config-reloaded: "&aConfiguration reloaded!"
-  invalid-player: "&cPlayer &f{player} &cnot found!"
-  cooldown-active: "&cPlease wait &f{time}&cs"
+  config-reloaded: "&fConfiguration reloaded!"
+  invalid-player: "&cPlayer &6{player} &cnot found!"
+  cooldown-active: "&cPlease wait &6{time}&cs"
   command-disabled: "&cCommand disabled!"
 
 # ── Hub ────────────────────────────────────────────────────────────────────────
@@ -99,55 +99,55 @@ hub:
 # ── Mute ───────────────────────────────────────────────────────────────────────
 
 mute:
-  muted: "&aPlayer &f{player} &amuted for &f{time}"
-  unmuted: "&aPlayer &f{player} &aunmuted"
-  already-muted: "&7Player &f{player} &7is already muted"
-  not-muted: "&7Player &f{player} &7is not muted"
-  you-muted: "&cYou are muted! &7Remaining: &f{time}"
+  muted: "&fPlayer &6{player} &fmuted for &6{time}"
+  unmuted: "&fPlayer &6{player} &funmuted"
+  already-muted: "&7Player &6{player} &7is already muted"
+  not-muted: "&7Player &6{player} &7is not muted"
+  you-muted: "&cYou are muted! &7Remaining: &6{time}"
   permanent: "&cYou are permanently muted!"
 
 # ── Gradients ──────────────────────────────────────────────────────────────────
 
 gradient:
-  color-set: "&aGradient set!"
-  color-enabled: "&aGradient nickname enabled"
+  color-set: "&fGradient set!"
+  color-enabled: "&fGradient nickname enabled"
   color-disabled: "&7Gradient nickname disabled"
   color-reset: "&7Gradient reset"
   prefix-set: "&aPrefix set!"
   prefix-reset: "&7Prefix reset"
-  prefix-enabled: "&aPrefix enabled"
+  prefix-enabled: "&fPrefix enabled"
   prefix-disabled: "&7Prefix disabled"
-  invalid-hex: "&cInvalid hex color: &f{color}"
-  invalid-color: "&cInvalid color: &f{color}"
-  too-many-colors: "&cToo many colors! Maximum: &f{max}"
-  too-few-colors: "&cToo few colors! Minimum: &f{min}"
-  cooldown: "&cPlease wait &f{time} &cseconds"
-  not-enough-points: "&cNot enough points! Need: &f{price}"
+  invalid-hex: "&cInvalid hex color: &6{color}"
+  invalid-color: "&cInvalid color: &6{color}"
+  too-many-colors: "&cToo many colors! Maximum: &6{max}"
+  too-few-colors: "&cToo few colors! Minimum: &6{min}"
+  cooldown: "&cPlease wait &6{time} &cseconds"
+  not-enough-points: "&cNot enough points! Need: &6{price}"
   player-not-found: "&cPlayer not found"
-  color-help: "&cUsage: &f/color <hex1> <hex2> ..."
-  color-success: "&aGradient applied!"
+  color-help: "&cUsage: &6/color <hex1> <hex2> ..."
+  color-success: "&fGradient applied!"
   color-no-colors: "&7You have no colors set"
-  prefix-help: "&cUsage: &f/prefix <text>"
+  prefix-help: "&cUsage: &6/prefix <text>"
   prefix-success: "&aPrefix set!"
   prefix-success-free: "&aPrefix set!"
   prefix-no-prefix: "&7You have no prefix"
-  prefix-too-long: "&cPrefix too long! Max: &f{max}"
+  prefix-too-long: "&cPrefix too long! Max: &6{max}"
   prefix-no-colors: "&cPrefix cannot contain color codes"
   only-player: "&cPlayers only!"
   no-permission: "&cNo permission!"
-  reload-success: "&aConfiguration reloaded!"
-  info-header: "&8\u2500\u2500\u2500\u2500\u2500 &f{player} &8\u2500\u2500\u2500\u2500\u2500"
-  info-prefix: "&7Prefix: &f{prefix}"
-  info-colors: "&7Colors: &f{colors}"
+  reload-success: "&fConfiguration reloaded!"
+  info-header: "&8\u2500\u2500\u2500\u2500\u2500 &6{player} &8\u2500\u2500\u2500\u2500\u2500"
+  info-prefix: "&7Prefix: &6{prefix}"
+  info-colors: "&7Colors: &6{colors}"
 
 # ── Custom Nicknames ───────────────────────────────────────────────────────────
 
 nick:
-  current: "&7Your nickname: &f{nick}"
-  usage: "&cUsage: &f/nick <name> &7or &f/nick reset"
+  current: "&7Your nickname: &6{nick}"
+  usage: "&cUsage: &6/nick <name> &7or &6/nick reset"
   no-nick: "&7You have no custom nickname"
-  reset-success: "&aNickname reset!"
-  set-success: "&aNickname changed to: &f{nick}"
+  reset-success: "&fNickname reset!"
+  set-success: "&fNickname changed to: &6{nick}"
   invalid: "&cInvalid nickname!"
   taken: "&cThis nickname is already taken!"
   error: "&cFailed to set nickname!"
@@ -156,11 +156,11 @@ nick:
 
 rp:
   me: "&7* {player} {action}"
-  try-format: "&7* {player} tries {action}... &f{result}"
+  try-format: "&7* {player} tries {action}... &6{result}"
   try-success: "&a[Success!]"
   try-fail: "&c[Fail!]"
-  do-format: "&8[Scene] &f{description} &7({player})"
-  roll-format: "&7* {player} rolls &f{result} &7out of &f{max}"
+  do-format: "&8[Scene] &6{description} &7({player})"
+  roll-format: "&7* {player} rolls &6{result} &7out of &6{max}"
   roll-min-error: "&cMinimum dice value: 2"
   roll-max-error: "&cMaximum dice value: 1000000"
   roll-invalid-number: "&cPlease specify a number: /roll [max]"

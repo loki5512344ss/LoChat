@@ -9,7 +9,9 @@ import com.loki.lochat.compat.Msg;
 import com.loki.lochat.core.filter.AdvancedMessageFilter;
 import com.loki.lochat.core.filter.FilterResult;
 import com.loki.lochat.renderer.EnhancedChatRenderer;
+import com.loki.lochat.translate.TranslationService;
 import com.loki.lochat.utils.format.ChatFormatter;
+import com.loki.lochat.utils.format.LuckPermsAffixes;
 
 import net.kyori.adventure.text.Component;
 
@@ -80,6 +82,7 @@ public class ChatEventListener implements Listener {
         Component displayName = buildDisplayName(sender);
         Set<Player> recipients = new HashSet<>(event.getRecipients());
         event.setCancelled(true);
+        prefetchTranslation(sender, messageComponent, recipients);
         for (Player viewer : recipients) {
             Component rendered = renderer.render(sender, displayName, messageComponent, viewer);
             Msg.send(viewer, rendered);
@@ -132,6 +135,7 @@ public class ChatEventListener implements Listener {
         Component displayName = buildDisplayName(sender);
         Set<Player> recipients = new HashSet<>(event.getRecipients());
         event.setCancelled(true);
+        prefetchTranslation(sender, messageComponent, recipients);
         for (Player viewer : recipients) {
             Component rendered = renderer.render(sender, displayName, messageComponent, viewer);
             Msg.send(viewer, rendered);
@@ -226,7 +230,35 @@ public class ChatEventListener implements Listener {
         if (legacyName == null || legacyName.isBlank()) {
             return Component.text(sender.getName());
         }
+        // LuckPerms prefix/suffix are added separately ({player_prefix}/{player_suffix}), do not show them twice
+        legacyName = LuckPermsAffixes.withoutAffixes(legacyName, LuckPermsAffixes.prefix(sender),
+                LuckPermsAffixes.suffix(sender));
         return ChatFormatter.parse(legacyName);
+    }
+
+    /** Translates the message for every viewer language before rendering (runs off the main thread only). */
+    private void prefetchTranslation(Player sender, Component messageComponent, Set<Player> recipients) {
+        try {
+            LoChat loChat = (LoChat) plugin;
+            var cfg = loChat.getConfigManager();
+            TranslationService ts = loChat.getTranslationService();
+            if (!cfg.isTranslationEnabled() || !ts.isEnabled() || Bukkit.isPrimaryThread()
+                    || "actionbar".equalsIgnoreCase(cfg.getTranslationMode())
+                    || sender.hasPermission(cfg.getTranslationBypassPermission())) {
+                return;
+            }
+            Set<String> languages = new HashSet<>();
+            for (Player viewer : recipients) {
+                if (!viewer.equals(sender)) {
+                    languages.add(TranslationService.localeToLanguageCode(viewer.getLocale()));
+                }
+            }
+            if (!languages.isEmpty()) {
+                ts.prefetch(Msg.plain(messageComponent), languages, cfg.getTranslationTimeoutMs());
+            }
+        } catch (Exception e) {
+            plugin.getLogger().fine("Translation prefetch failed: " + e.getMessage());
+        }
     }
 
     private void recordStatistics(LoChat loChat, Player sender, boolean isGlobal) {

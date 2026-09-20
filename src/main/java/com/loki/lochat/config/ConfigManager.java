@@ -249,6 +249,26 @@ public class ConfigManager {
         return accessor.getTranslationApiKey();
     }
 
+    public String getTranslationProvider() {
+        return accessor.getTranslationProvider();
+    }
+
+    public String getTranslationMode() {
+        return accessor.getTranslationMode();
+    }
+
+    public int getTranslationTimeoutMs() {
+        return accessor.getTranslationTimeoutMs();
+    }
+
+    public java.util.List<String> getTranslationHoverFormat() {
+        return accessor.getTranslationHoverFormat();
+    }
+
+    public String getTranslationBypassPermission() {
+        return accessor.getTranslationBypassPermission();
+    }
+
     // ========== LoPreff integration ==========
 
     public boolean isLopreffEnabled() {

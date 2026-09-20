@@ -33,11 +33,20 @@ public class TranslationService {
     private final String endpoint;
     private final String apiKey;
     private final boolean enabled;
+    private final String provider;
+    private final int timeoutMs;
 
     public TranslationService(String endpoint, String apiKey, boolean enabled, Logger logger) {
+        this(endpoint, apiKey, enabled, "libretranslate", 3000, logger);
+    }
+
+    public TranslationService(String endpoint, String apiKey, boolean enabled, String provider, int timeoutMs,
+                              Logger logger) {
         this.endpoint = endpoint != null ? endpoint.replaceAll("/+$", "") : "";
         this.apiKey = apiKey;
         this.enabled = enabled;
+        this.provider = provider == null ? "libretranslate" : provider.toLowerCase(Locale.ROOT);
+        this.timeoutMs = Math.max(500, timeoutMs);
         this.logger = logger;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(TIMEOUT)
@@ -59,8 +68,37 @@ public class TranslationService {
         });
     }
 
+    private boolean isGoogle() {
+        return "google".equals(provider);
+    }
+
     public boolean isEnabled() {
-        return enabled && !endpoint.isBlank();
+        return enabled && (isGoogle() || !endpoint.isBlank());
+    }
+
+    /** Cached translation for the given language, or null if it has not been translated yet. */
+    public String getCachedTranslation(String text, String language) {
+        return getCached(text, localeToLanguageCode(language));
+    }
+
+    /**
+     * Translates the text into every given language in parallel and waits up to timeoutMs.
+     * Call it off the main thread; the results end up in the cache.
+     */
+    public void prefetch(String text, java.util.Collection<String> languages, long timeoutMs) {
+        if (!isEnabled() || text == null || text.isBlank()) {
+            return;
+        }
+        java.util.List<CompletableFuture<String>> futures = new java.util.ArrayList<>();
+        for (String language : languages) {
+            futures.add(translateAsync(text, language));
+        }
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .get(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            // timeout or failure: the message is simply sent without a translation
+        }
     }
 
     public CompletableFuture<String> translateAsync(String text, String targetLanguage) {
@@ -89,7 +127,91 @@ public class TranslationService {
         }
     }
 
+    private volatile long gtxBlockedUntil;
+    private volatile long chromeBlockedUntil;
+
+    /**
+     * The gtx endpoint gets IP-blocked (HTTP 429 / captcha page) very quickly, so the Chrome dictionary
+     * endpoint is tried first and gtx is only a fallback; a blocked endpoint is skipped for a minute.
+     */
+    private String doFetchGoogle(String text, String targetLang) throws Exception {
+        long now = System.currentTimeMillis();
+        String q = java.net.URLEncoder.encode(text, StandardCharsets.UTF_8);
+        String tl = java.net.URLEncoder.encode(targetLang, StandardCharsets.UTF_8);
+        Exception last = null;
+        if (now >= chromeBlockedUntil) {
+            try {
+                return parseChromeResponse(get("https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl="
+                        + tl + "&q=" + q));
+            } catch (Exception e) {
+                chromeBlockedUntil = now + 60_000;
+                last = e;
+            }
+        }
+        if (now >= gtxBlockedUntil) {
+            try {
+                return parseGoogleResponse(get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&dt=t&tl="
+                        + tl + "&q=" + q));
+            } catch (Exception e) {
+                gtxBlockedUntil = now + 60_000;
+                last = e;
+            }
+        }
+        throw last != null ? last : new RuntimeException("all translation endpoints are on cooldown");
+    }
+
+    private String get(String url) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofMillis(timeoutMs))
+                .header("User-Agent", "Mozilla/5.0")
+                .GET()
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Google returned " + response.statusCode());
+        }
+        return response.body();
+    }
+
+    /** Chrome dictionary response: [["translated","detected-language"], ...]. */
+    static String parseChromeResponse(String body) {
+        com.google.gson.JsonArray root = JsonParser.parseString(body).getAsJsonArray();
+        StringBuilder sb = new StringBuilder();
+        for (com.google.gson.JsonElement segment : root) {
+            if (segment.isJsonArray()) {
+                com.google.gson.JsonArray parts = segment.getAsJsonArray();
+                if (parts.size() > 0 && !parts.get(0).isJsonNull()) {
+                    sb.append(parts.get(0).getAsString());
+                }
+            } else if (segment.isJsonPrimitive()) {
+                sb.append(segment.getAsString());
+                break;
+            }
+        }
+        if (sb.length() == 0) {
+            throw new RuntimeException("empty translation response");
+        }
+        return sb.toString();
+    }
+
+    /** Google response: [[["translated","original",...], ...], null, "detected-language"]. */
+    static String parseGoogleResponse(String body) {
+        com.google.gson.JsonArray root = JsonParser.parseString(body).getAsJsonArray();
+        StringBuilder sb = new StringBuilder();
+        for (com.google.gson.JsonElement segment : root.get(0).getAsJsonArray()) {
+            com.google.gson.JsonArray parts = segment.getAsJsonArray();
+            if (parts.size() > 0 && !parts.get(0).isJsonNull()) {
+                sb.append(parts.get(0).getAsString());
+            }
+        }
+        return sb.toString();
+    }
+
     private String doFetch(String text, String targetLang) throws Exception {
+        if (isGoogle()) {
+            return doFetchGoogle(text, targetLang);
+        }
         JsonObject body = new JsonObject();
         body.addProperty("q", text);
         body.addProperty("source", "auto");
@@ -141,12 +263,12 @@ public class TranslationService {
         if (locale == null || locale.isBlank()) {
             return "en";
         }
-        String lang = locale.split("_")[0].toLowerCase(Locale.ROOT);
-        return switch (lang) {
-            case "zh" -> "zh-CN";
-            case "zh-tw", "zh-hk" -> "zh-TW";
-            default -> lang;
-        };
+        String normalized = locale.toLowerCase(Locale.ROOT).replace('-', '_');
+        if (normalized.startsWith("zh_tw") || normalized.startsWith("zh_hk")) {
+            return "zh-TW";
+        }
+        String lang = normalized.split("_")[0];
+        return "zh".equals(lang) ? "zh-CN" : lang;
     }
 
     public void clearCache() {

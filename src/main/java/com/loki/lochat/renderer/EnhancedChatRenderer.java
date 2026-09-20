@@ -64,12 +64,7 @@ public class EnhancedChatRenderer {
 
         if (viewer != null) {
             processed = mentionHandler.processMentions(processed, source, viewer);
-            if (cfg.isTranslationEnabled()) {
-                com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
-                if (loChat.getTranslationService().isEnabled()) {
-                    sendTranslationAsync(viewer, PlainTextComponentSerializer.plainText().serialize(processed));
-                }
-            }
+            processed = applyTranslation(source, viewer, message, processed);
         }
 
         // Получаем формат из конфига
@@ -124,7 +119,7 @@ public class EnhancedChatRenderer {
 
         while (matcher.find()) {
             if (matcher.start() > lastEnd) {
-                result = result.append(Component.text(format.substring(lastEnd, matcher.start())));
+                result = result.append(ChatFormatter.parse(format.substring(lastEnd, matcher.start())));
             }
 
             String placeholder = matcher.group(1);
@@ -134,7 +129,7 @@ public class EnhancedChatRenderer {
         }
 
         if (lastEnd < format.length()) {
-            result = result.append(Component.text(format.substring(lastEnd)));
+            result = result.append(ChatFormatter.parse(format.substring(lastEnd)));
         }
 
         return result;
@@ -156,6 +151,11 @@ public class EnhancedChatRenderer {
             }
         }
 
+        String luckPermsPrefix = com.loki.lochat.utils.format.LuckPermsAffixes.prefix(player);
+        if (!luckPermsPrefix.isEmpty()) {
+            return com.loki.lochat.utils.format.ChatFormatter.parse(luckPermsPrefix);
+        }
+
         return Component.empty();
     }
 
@@ -168,6 +168,11 @@ public class EnhancedChatRenderer {
             if (!suffix.isEmpty()) {
                 return com.loki.lochat.utils.format.ChatFormatter.parse(suffix);
             }
+        }
+
+        String luckPermsSuffix = com.loki.lochat.utils.format.LuckPermsAffixes.suffix(player);
+        if (!luckPermsSuffix.isEmpty()) {
+            return com.loki.lochat.utils.format.ChatFormatter.parse(luckPermsSuffix);
         }
 
         return Component.empty();
@@ -237,6 +242,50 @@ public class EnhancedChatRenderer {
         return displayName
                 .hoverEvent(HoverEvent.showText(hoverBuilder.build()))
                 .clickEvent(ClickEvent.suggestCommand("/msg " + player.getName() + " "));
+    }
+
+    /**
+     * Adds the translation into the viewer's client language: as hover text over the message (default)
+     * or in the action bar. The translation must already be cached (see ChatEventListener#prefetchTranslation).
+     */
+    private Component applyTranslation(Player source, Player viewer, Component original, Component processed) {
+        if (!cfg.isTranslationEnabled() || viewer.equals(source)) {
+            return processed;
+        }
+        com.loki.lochat.LoChat loChat = (com.loki.lochat.LoChat) plugin;
+        TranslationService ts = loChat.getTranslationService();
+        if (!ts.isEnabled() || source.hasPermission(cfg.getTranslationBypassPermission())) {
+            return processed;
+        }
+        String plain = PlainTextComponentSerializer.plainText().serialize(original);
+        if (plain.isBlank()) {
+            return processed;
+        }
+        if ("actionbar".equalsIgnoreCase(cfg.getTranslationMode())) {
+            sendTranslationAsync(viewer, plain);
+            return processed;
+        }
+        String translated = ts.getCachedTranslation(plain, viewer.getLocale());
+        if (translated == null || translated.isBlank() || translated.equalsIgnoreCase(plain)) {
+            return processed;
+        }
+        Component hover = Component.empty();
+        boolean first = true;
+        for (String line : cfg.getTranslationHoverFormat()) {
+            if (!first) {
+                hover = hover.append(Component.newline());
+            }
+            first = false;
+            int idx = line.indexOf("{translation}");
+            if (idx < 0) {
+                hover = hover.append(ChatFormatter.parse(line));
+            } else {
+                hover = hover.append(ChatFormatter.parse(line.substring(0, idx)))
+                        .append(Component.text(translated))
+                        .append(ChatFormatter.parse(line.substring(idx + "{translation}".length())));
+            }
+        }
+        return processed.hoverEvent(HoverEvent.showText(hover));
     }
 
     private void sendTranslationAsync(Player viewer, String plainText) {

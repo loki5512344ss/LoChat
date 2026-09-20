@@ -5,25 +5,25 @@
 
 commands:
   mute:
-    usage: "&cUsage: &f/mute <player> [time] [-s] [reason]"
-    time-help: "&7Time format: &f1d&7, &f2h&7, &f30m&7, &f60s&7, &fperm"
-    silent-help: "&7-s &7= silent mute (requires &flochat.mute.silent&7)"
+    usage: "&cUsage: &6/lmute <player> [time] [-s] [reason]"
+    time-help: "&7Time format: &61d&7, &62h&7, &630m&7, &660s&7, &6perm"
+    silent-help: "&7Use &6-s &7for a silent mute (needs &6lochat.mute.silent&7)"
     no-silent-permission: "&cNo permission for silent mute"
     default-reason: "No reason specified"
     default-duration: "7d"
 
   cooldown:
-    message: "&cPlease wait &f{remaining} &cseconds"
+    message: "&cPlease wait &6{remaining} &cseconds"
 
   clear-chat:
-    lines-cleared: "&aChat cleared &7({lines} lines)"
+    lines-cleared: "&fChat cleared &7({lines} lines)"
     no-permission: "&cNo permission to clear chat"
 
 # ── Local Chat ─────────────────────────────────────────────────────────────────
 
 local-chat:
-  nobody-heard: "&7Nobody heard you — no players nearby"
-  no-players-nearby: "&7No players nearby"
+  nobody-heard: "&7Nobody heard you. Start your message with &6! &7to be heard everywhere."
+  no-players-nearby: "&7No players nearby. Start your message with &6! &7to write to everyone."
 
 # ── Filters ────────────────────────────────────────────────────────────────────
 
@@ -42,13 +42,13 @@ filters:
 # ── Mute Messages ──────────────────────────────────────────────────────────────
 
 mute:
-  muted-message: "&cYou are muted! &7Reason: &f{reason}&7. Remaining: &f{time}"
-  muted-permanent: "&cYou are permanently muted! &7Reason: &f{reason}"
-  player-muted: "&aPlayer &f{player} &amuted for &f{time}&a. Reason: &7{reason}"
-  player-muted-permanent: "&aPlayer &f{player} &amuted permanently. Reason: &7{reason}"
-  player-muted-silent: "&8[&7SILENT&8] &f{player} &7muted for &f{time}"
-  player-unmuted: "&aPlayer &f{player} &aunmuted"
-  not-muted: "&7Player &f{player} &7is not muted"
+  muted-message: "&cYou are muted! &7Reason: &6{reason}&7. Remaining: &6{time}"
+  muted-permanent: "&cYou are permanently muted! &7Reason: &6{reason}"
+  player-muted: "&fPlayer &6{player} &fmuted for &6{time}&f. Reason: &7{reason}"
+  player-muted-permanent: "&fPlayer &6{player} &fmuted permanently. Reason: &7{reason}"
+  player-muted-silent: "&8[&7SILENT&8] &6{player} &7muted for &6{time}"
+  player-unmuted: "&fPlayer &6{player} &funmuted"
+  not-muted: "&7Player &6{player} &7is not muted"
   player-not-found: "&cPlayer not found!"
   invalid-time: "&cInvalid time format!"
   already-muted: "&cPlayer is already muted!"
@@ -66,17 +66,17 @@ gamemodes:
 
 private-messages:
   no-reply-target: "&cNobody to reply to"
-  message-sent: "&aMessage sent to &f{player}"
-  player-offline: "&cPlayer &f{player} &cis not online"
+  message-sent: "&fMessage sent to &6{player}"
+  player-offline: "&cPlayer &6{player} &cis not online"
   cannot-message-self: "&cYou cannot message yourself"
 
 # ── Ignore ─────────────────────────────────────────────────────────────────────
 
 ignore:
-  player-ignored: "&aPlayer &f{player} &ais now ignored"
-  player-unignored: "&aPlayer &f{player} &ais no longer ignored"
-  already-ignored: "&7Player &f{player} &7is already ignored"
-  not-ignored: "&7Player &f{player} &7is not ignored"
+  player-ignored: "&fPlayer &6{player} &fis now ignored"
+  player-unignored: "&fPlayer &6{player} &fis no longer ignored"
+  already-ignored: "&7Player &6{player} &7is already ignored"
+  not-ignored: "&7Player &6{player} &7is not ignored"
   cannot-ignore-self: "&cYou cannot ignore yourself"
   ignore-list-empty: "&7Your ignore list is empty"
   ignore-list-header: "&7Ignored players:"
@@ -97,7 +97,7 @@ general:
     days: "d"
     permanent: "permanent"
   enabled: "&aEnabled"
-  disabled: "&7Disabled"
+  disabled: "&cDisabled"
   online: "&aOnline"
   offline: "&7Offline"
 

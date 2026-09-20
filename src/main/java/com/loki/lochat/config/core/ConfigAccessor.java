@@ -150,6 +150,29 @@ public class ConfigAccessor {
         return config.getString("chat.translation.api-key", "");
     }
 
+    /** "libretranslate" (needs endpoint and usually a key) or "google" (free, no key). */
+    public String getTranslationProvider() {
+        return config.getString("chat.translation.provider", "libretranslate");
+    }
+
+    /** "hover" shows the translation when hovering the message, "actionbar" shows it above the hotbar. */
+    public String getTranslationMode() {
+        return config.getString("chat.translation.mode", "hover");
+    }
+
+    public int getTranslationTimeoutMs() {
+        return config.getInt("chat.translation.timeout-ms", 3000);
+    }
+
+    public java.util.List<String> getTranslationHoverFormat() {
+        java.util.List<String> lines = config.getStringList("chat.translation.hover-format");
+        return lines.isEmpty() ? java.util.List.of("&7Translation:", "&f{translation}") : lines;
+    }
+
+    public String getTranslationBypassPermission() {
+        return config.getString("chat.translation.bypass-permission", "lochat.translate.bypass");
+    }
+
     // ========== LoPreff integration ==========
 
     public boolean isLopreffEnabled() {

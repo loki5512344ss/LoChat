@@ -60,6 +60,8 @@ public final class LoChat extends JavaPlugin {
             configManager.getTranslationEndpoint(),
             configManager.getTranslationApiKey(),
             configManager.isTranslationEnabled(),
+            configManager.getTranslationProvider(),
+            configManager.getTranslationTimeoutMs(),
             getLogger()
         );
         
