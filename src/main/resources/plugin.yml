@@ -1,10 +1,9 @@
 name: LoChat
-version: '1.5.5-1.21'
+version: '1.5.5-1.20.1'
 main: com.loki.lochat.LoChat
-api-version: '1.21'
-folia-supported: true
+api-version: '1.20'
 author: loki
-description: Advanced chat plugin for Paper/Folia 1.21 — Spacelegacy edition
+description: Advanced chat plugin for Spigot/Mohist 1.20.1 and Paper 1.20.x-1.21.x — Spacelegacy edition (universal jar)
 
 softdepend:
   - PlaceholderAPI

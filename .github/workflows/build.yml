@@ -2,7 +2,7 @@ name: Build & Test
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, spigot-1.20.1]
   pull_request:
     branches: [main]
 
