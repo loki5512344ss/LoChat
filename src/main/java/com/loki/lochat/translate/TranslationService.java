@@ -118,7 +118,13 @@ public class TranslationService {
 
     private String fetchTranslation(String text, String targetLang) {
         try {
+            DETECTED.remove();
             String translation = doFetch(text, targetLang);
+            String detected = DETECTED.get();
+            if (detected != null && sameLanguage(detected, targetLang)) {
+                // the message is already in the viewer's language: nothing to translate
+                translation = text;
+            }
             putCached(text, targetLang, translation);
             return translation;
         } catch (Exception e) {
@@ -126,6 +132,8 @@ public class TranslationService {
             return text;
         }
     }
+
+    private static final ThreadLocal<String> DETECTED = new ThreadLocal<>();
 
     private volatile long gtxBlockedUntil;
     private volatile long chromeBlockedUntil;
@@ -160,6 +168,10 @@ public class TranslationService {
         throw last != null ? last : new RuntimeException("all translation endpoints are on cooldown");
     }
 
+    private static boolean sameLanguage(String a, String b) {
+        return a.toLowerCase(Locale.ROOT).split("[-_]")[0].equals(b.toLowerCase(Locale.ROOT).split("[-_]")[0]);
+    }
+
     private String get(String url) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -184,6 +196,9 @@ public class TranslationService {
                 if (parts.size() > 0 && !parts.get(0).isJsonNull()) {
                     sb.append(parts.get(0).getAsString());
                 }
+                if (parts.size() > 1 && parts.get(1).isJsonPrimitive()) {
+                    DETECTED.set(parts.get(1).getAsString());
+                }
             } else if (segment.isJsonPrimitive()) {
                 sb.append(segment.getAsString());
                 break;
@@ -198,6 +213,9 @@ public class TranslationService {
     /** Google response: [[["translated","original",...], ...], null, "detected-language"]. */
     static String parseGoogleResponse(String body) {
         com.google.gson.JsonArray root = JsonParser.parseString(body).getAsJsonArray();
+        if (root.size() > 2 && root.get(2).isJsonPrimitive()) {
+            DETECTED.set(root.get(2).getAsString());
+        }
         StringBuilder sb = new StringBuilder();
         for (com.google.gson.JsonElement segment : root.get(0).getAsJsonArray()) {
             com.google.gson.JsonArray parts = segment.getAsJsonArray();
