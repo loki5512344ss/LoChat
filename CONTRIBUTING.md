@@ -30,7 +30,7 @@ First off, thank you for considering contributing! We welcome all types of contr
 
 ```bash
 # Clone and build
-git clone https://github.com/loki5512344/LoChat.git
+git clone https://github.com/loki5512344ss/LoChat.git
 cd LoChat
 ./gradlew build
 
@@ -89,7 +89,7 @@ Create an issue via [Feature Request template](.github/ISSUE_TEMPLATE/feature_re
 
 ```bash
 # Клонирование и сборка
-git clone https://github.com/loki5512344/LoChat.git
+git clone https://github.com/loki5512344ss/LoChat.git
 cd LoChat
 ./gradlew build
 
